@@ -15,6 +15,9 @@
 /* parametros do A-Team.                                                                 */
 /* ------------------------------------------------------------------------------------- */
 
+#ifndef IOParam_H
+#define IOParam_H
+
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
@@ -27,15 +30,12 @@
 #include <wx/filename.h>
 #include <wx/file.h>
 
+#define IOPARAMS_SUCCESS 1
+#define IOPARAMS_FAILURE 0
+
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
-
-#ifndef IOParam_H
-#define IOParam_H
-
-#define IOPARAMS_SUCCESS 1
-#define IOPARAMS_FAILURE 0
 
 class IOParam {
 
@@ -43,11 +43,6 @@ public:
     static int *readParams(const char *file_name);
     static int writeParams(const char *file_name, int *params);
     static char *getExecutablePath();
-
-private:
-
-protected:
-
 };
 
 #endif /* IOParam_H */

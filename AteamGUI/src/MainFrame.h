@@ -11,6 +11,9 @@
 /* Alteracoes: 0 -> (10/09/94)                                                           */
 /* ------------------------------------------------------------------------------------- */
 
+#ifndef MAINFRAME_H
+#define MAINFRAME_H
+
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
@@ -18,16 +21,12 @@
 #include <wx/wx.h>
 #include <wx/image.h>
 
-/* ------------------------------------------------------------------------------------- */
-/* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
-/* ------------------------------------------------------------------------------------- */
-
-#ifndef MAINFRAME_H
-#define MAINFRAME_H
-
 #include <wx/treectrl.h>
 #include <wx/statline.h>
 
+/* ------------------------------------------------------------------------------------- */
+/* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
+/* ------------------------------------------------------------------------------------- */
 enum
 {
     ID_BUTTON_START
@@ -36,35 +35,36 @@ enum
 class MainFrame: public wxFrame {
 
 public:
-    MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE);
+    MainFrame(
+        wxWindow* parent, int id, const wxString& title, const wxPoint& pos=wxDefaultPosition,
+        const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE
+    );
+
+    void onApplyClick();
 
 private:
     void set_properties();
     void do_layout();
-    void on_start_click(wxCommandEvent &event);
-    void on_stop_click(wxCommandEvent &event);
-    void on_plot_click(wxCommandEvent &event);
-    void on_add_click(wxCommandEvent &event);
-    void on_remove_click(wxCommandEvent &event);
-    void on_edit_click(wxCommandEvent &event);
-    //DECLARE_EVENT_TABLE()
 
+    void onStartClick(wxCommandEvent &event);
+    void onStopClick(wxCommandEvent &event);
+    void onPlotClick(wxCommandEvent &event);
+    void onAddClick(wxCommandEvent &event);
+    void onRemoveClick(wxCommandEvent &event);
+    void onEditClick(wxCommandEvent &event);
 
 protected:
-    wxStatusBar* main_frame_statusbar;
-    wxButton* start_button;
-    wxButton* stop_button;
-    wxButton* plot_button;
-    wxButton* add_button;
-    wxButton* remove_button;
-    wxButton* edit_button;
-    wxStaticLine* button_static_line;
-    wxTreeCtrl* team_tree_ctrl;
+    wxStatusBar *main_frame_statusbar;
 
+    wxButton *start_button, *stop_button, *plot_button,
+        *add_button, *remove_button, *edit_button;
+
+    wxStaticLine *button_static_line;
+    wxTreeCtrl *team_tree_ctrl;
 };
-
-#endif // MAINFRAME_H
 
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
+
+#endif /* MAINFRAME_H */

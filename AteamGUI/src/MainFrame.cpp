@@ -22,18 +22,15 @@
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
 
-/*
-BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-    EVT_BUTTON(11, MainFrame::on_start_click)
-END_EVENT_TABLE()
-*/
-
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
-    wxFrame(parent, id, title, pos, size, wxDEFAULT_FRAME_STYLE)
+MainFrame::MainFrame(
+    wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style
+):wxFrame(
+    parent, id, title, pos, size, wxDEFAULT_FRAME_STYLE
+)
 {
     main_frame_statusbar = CreateStatusBar(1, 0);
 
@@ -44,54 +41,23 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPo
     remove_button = new wxButton(this, 15, _("Remove"));
     edit_button = new wxButton(this, 16, _("Edit"));
 
-    Connect(11, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::on_start_click));
-    Connect(12, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::on_stop_click));
-    Connect(13, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::on_plot_click));
-    Connect(14, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::on_add_click));
-    Connect(15, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::on_remove_click));
-    Connect(16, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::on_edit_click));
+    stop_button->Disable();
+    plot_button->Disable();
+    add_button->Disable();
+    remove_button->Disable();
+    edit_button->Disable();
+
+    Connect(11, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onStartClick));
+    Connect(12, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onStopClick));
+    Connect(13, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onPlotClick));
+    Connect(14, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onAddClick));
+    Connect(15, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onRemoveClick));
+    Connect(16, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::onEditClick));
 
     button_static_line = new wxStaticLine(this, wxID_ANY);
 
     team_tree_ctrl = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE);
     team_tree_ctrl->SetWindowStyle(wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
-
-/*************************************************************************************************/
-    wxTreeItemId id_root = team_tree_ctrl->AddRoot(_T("A-Team Set Covering Problem"), -1, -1, NULL);
-
-    wxTreeItemId idy;
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-01 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-02 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-03 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-04 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-05 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-06 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-07 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-08 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-09 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-10 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-11 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-12 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-13 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-14 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-15 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-16 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-17 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-18 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-19 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-20 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-21 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-22 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-23 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-24 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-25 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-26 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-27 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-    idy = team_tree_ctrl->InsertItem(id_root, NULL, _T("Agent-28 | 127.0.0.1 | 12:00"), -1, -1, NULL);
-/*************************************************************************************************/
-
-
-
 
     set_properties();
     do_layout();
@@ -107,7 +73,7 @@ void MainFrame::set_properties()
     int main_frame_statusbar_widths[] = { -1 };
     main_frame_statusbar->SetStatusWidths(1, main_frame_statusbar_widths);
     const wxString main_frame_statusbar_fields[] = {
-        _("main_frame_statusbar")
+        _("")
     };
     for(int i = 0; i < main_frame_statusbar->GetFieldsCount(); ++i) {
         main_frame_statusbar->SetStatusText(main_frame_statusbar_fields[i], i);
@@ -147,9 +113,9 @@ void MainFrame::do_layout()
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void MainFrame::on_start_click(wxCommandEvent &event)
+void MainFrame::onStartClick(wxCommandEvent &event)
 {
-    AteamParam *ateam_param = new AteamParam(NULL, wxID_ANY, wxEmptyString, wxPoint(400, 70));
+    AteamParam *ateam_param = new AteamParam(this, wxID_ANY, wxEmptyString, wxPoint(400, 70));
     ateam_param->Show();
 }
 
@@ -157,45 +123,86 @@ void MainFrame::on_start_click(wxCommandEvent &event)
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void MainFrame::on_stop_click(wxCommandEvent &event)
+void MainFrame::onStopClick(wxCommandEvent &event)
 {
-    printf("Button Stop Clicked...\n");
+    stop_button->Disable();
+    plot_button->Disable();
+    add_button->Disable();
+    remove_button->Disable();
+    edit_button->Disable();
+
+    start_button->Enable();
+
+    team_tree_ctrl->DeleteAllItems();
 }
 
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void MainFrame::on_plot_click(wxCommandEvent &event)
+void MainFrame::onPlotClick(wxCommandEvent &event)
 {
-    printf("Button Plot Clicked...\n");
 }
 
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void MainFrame::on_add_click(wxCommandEvent &event)
+void MainFrame::onAddClick(wxCommandEvent &event)
 {
-    printf("Button Add Clicked...\n");
+    wxString input;
+    input = wxGetTextFromUser(_T("Agent name:"), _T("Input Agent"), _T(""), this);
+
+    //"Agent-01 | 127.0.0.1 | 12:00"
+
+    wxTreeItemId idy;
+    idy = team_tree_ctrl->InsertItem(team_tree_ctrl->GetRootItem(), NULL, input, -1, -1, NULL);
+
+    // ACHAR UM LUGAR!
+    team_tree_ctrl->ExpandAll();
 }
 
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void MainFrame::on_remove_click(wxCommandEvent &event)
+void MainFrame::onRemoveClick(wxCommandEvent &event)
 {
-    printf("Button Remove Clicked...\n");
+    wxTreeItemId item = team_tree_ctrl->GetSelection();
+    team_tree_ctrl->Delete(item);
 }
 
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void MainFrame::on_edit_click(wxCommandEvent &event)
+void MainFrame::onEditClick(wxCommandEvent &event)
 {
-    printf("Button Edit Clicked...\n");
+    wxTreeItemId item = team_tree_ctrl->GetSelection();
+
+    wxString input = wxGetTextFromUser(
+        _T("Agent name:"), _T("Rename Agent"),
+        team_tree_ctrl->GetItemText(item), this
+    );
+
+    team_tree_ctrl->SetItemText(item, input);
+}
+
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
+void MainFrame::onApplyClick()
+{
+    team_tree_ctrl->AddRoot(_T("A-Team Set Covering Problem"), -1, -1, NULL);
+
+    stop_button->Enable();
+    plot_button->Enable();
+    add_button->Enable();
+    remove_button->Enable();
+    edit_button->Enable();
+
+    start_button->Disable();
 }
 
 /* ------------------------------------------------------------------------------------- */

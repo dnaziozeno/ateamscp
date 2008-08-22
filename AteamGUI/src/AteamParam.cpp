@@ -15,8 +15,9 @@
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
 
-#include "IOParam.h"
 #include "AteamParam.h"
+#include "IOParam.h"
+#include "MainFrame.h"
 
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
@@ -50,15 +51,11 @@ AteamParam::AteamParam(
     apply_button = new wxButton(this, 114, _("Apply"));
     hide_button = new wxButton(this, 115, _("Hide"));
 
-    /** NO WXHELPER HERE --> */
-
-    Connect(111, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onOpen));
-    Connect(112, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onSave));
-    Connect(113, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onReset));
-    Connect(114, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onApply));
-    Connect(115, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onHide));
-
-    /** <---------------- */
+    Connect(111, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onOpenClick));
+    Connect(112, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onSaveClick));
+    Connect(113, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onResetClick));
+    Connect(114, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onApplyClick));
+    Connect(115, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onHideClick));
 
     button_static_line_01 = new wxStaticLine(this, wxID_ANY);
 
@@ -88,43 +85,43 @@ AteamParam::AteamParam(
 
     time_sleeping_label = new wxStaticText(this, wxID_ANY, _("TimeSleeping:"));
     time_sleeping_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("120"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000
     );
 
     max_len_dual_mem_label = new wxStaticText(this, wxID_ANY, _("MaxLenDualMem:"));
     max_len_dual_mem_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("300"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000
     );
 
     max_len_primal_mem_label = new wxStaticText(this, wxID_ANY, _("MaxLenPrimalMem:"));
     max_len_primal_mem_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("600"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000
     );
 
     max_len_cut_mem_label = new wxStaticText(this, wxID_ANY, _("MaxLenCutMem:"));
     max_len_cut_mem_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("50021"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 100000
     );
 
     len_hash_tab_label = new wxStaticText(this, wxID_ANY, _("LenHashTab:"));
     len_hash_tab_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("40009"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 100000
     );
 
     cut_sof_sol_label = new wxStaticText(this, wxID_ANY, _("CutSofSol:"));
     cut_sof_sol_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("500"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000
     );
 
     max_cut_gen_label = new wxStaticText(this, wxID_ANY, _("MaxCutGen:"));
     max_cut_gen_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("200"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000
     );
 
@@ -135,48 +132,50 @@ AteamParam::AteamParam(
 
     min_change_label = new wxStaticText(this, wxID_ANY, _("MinChange:"));
     min_change_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("4"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 100
     );
 
     max_exe_time_label = new wxStaticText(this, wxID_ANY, _("MaxExeTime:"));
     max_exe_time_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("108000"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000000
     );
 
     reduc_perc_label = new wxStaticText(this, wxID_ANY, _("ReducPerc:"));
     reduc_perc_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("30"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 100
     );
 
     restr_value_label = new wxStaticText(this, wxID_ANY, _("RestrValue:"));
     restr_value_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("90"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 100
     );
 
     tabu_iterations_label = new wxStaticText(this, wxID_ANY, _("TabuIterations:"));
     tabu_iterations_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("2"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 100
     );
 
     max_sol_dual_ag_label = new wxStaticText(this, wxID_ANY, _("MaxSolDualAg:"));
     max_sol_dual_ag_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("50"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 100
     );
 
     max_sol_primal_ag_label = new wxStaticText(this, wxID_ANY, _("MaxSolPrimalAg:"));
     max_sol_primal_ag_spin_ctrl = new wxSpinCtrl(
-        this, wxID_ANY, wxT("100"), wxDefaultPosition,
+        this, wxID_ANY, wxT(""), wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 100
     );
 
     set_properties();
     do_layout();
+
+    AteamParam::defaultParams();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -204,36 +203,30 @@ void AteamParam::set_properties()
 
     dual_worst_checkbox->SetMinSize(wxSize(125, 22));
     dual_worst_checkbox->SetToolTip(_("(T/F) aceita (ou nao) sol. pior que a pior da mem."));
-    dual_worst_checkbox->SetValue(1);
 
     primal_worst_checkbox->SetMinSize(wxSize(125, 22));
     primal_worst_checkbox->SetToolTip(_("(T/F) aceita (ou nao) sol. pior que a pior da mem."));
 
     random_init_mp_checkbox->SetMinSize(wxSize(125, 22));
     random_init_mp_checkbox->SetToolTip(_("(T/F) greedy randomica inicia a mem. sol. primais"));
-    random_init_mp_checkbox->SetValue(1);
 
     random_primal_checkbox->SetMinSize(wxSize(148, 22));
     random_primal_checkbox->SetToolTip(_("(T/F) greedy randomica usada no ag. primal greedy"));
 
     random_consensus_checkbox->SetMinSize(wxSize(148, 22));
     random_consensus_checkbox->SetToolTip(_("(T/F) greedy randomica usada no ag. consensus."));
-    random_consensus_checkbox->SetValue(1);
 
     random_init_md_checkbox->SetMinSize(wxSize(116, 22));
     random_init_md_checkbox->SetToolTip(_("(T/F) greedy randomica inicia a mem. sol. duais"));
-    random_init_md_checkbox->SetValue(1);
 
     random_dual_checkbox->SetMinSize(wxSize(106, 22));
     random_dual_checkbox->SetToolTip(_("(T/F) greedy randomica usada no ag. dual greedy"));
-    random_dual_checkbox->SetValue(1);
 
     balas_ng_cut_checkbox->SetMinSize(wxSize(110, 22));
     balas_ng_cut_checkbox->SetToolTip(_("(T/F) Se T gera cortes do tipo BN senao BR"));
 
     equal_cost_sol_checkbox->SetMinSize(wxSize(109, 22));
     equal_cost_sol_checkbox->SetToolTip(_("(T/F) Se T o serverMP aceita sol. de mesmo custo."));
-    equal_cost_sol_checkbox->SetValue(1);
 
     time_sleeping_label->SetMinSize(wxSize(130, 18));
     time_sleeping_label->SetToolTip(_("Tempo em que um agente tera a execucao suspensa"));
@@ -304,8 +297,6 @@ void AteamParam::set_properties()
     max_sol_primal_ag_label->SetToolTip(_("Max. sol. geradas por um agente primal (% da mem.)"));
     max_sol_primal_ag_spin_ctrl->SetMinSize(wxSize(80, 23));
     max_sol_primal_ag_spin_ctrl->SetToolTip(_("Max. sol. geradas por um agente primal (% da mem.)"));
-
-    AteamParam::defaultParams();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -422,7 +413,7 @@ void AteamParam::do_layout()
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void AteamParam::onOpen(wxCommandEvent &event)
+void AteamParam::onOpenClick(wxCommandEvent &event)
 {
     SetStatusText(_(""), 0);
 
@@ -461,7 +452,7 @@ void AteamParam::onOpen(wxCommandEvent &event)
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void AteamParam::onSave(wxCommandEvent &event)
+void AteamParam::onSaveClick(wxCommandEvent &event)
 {
     SetStatusText(_(""), 0);
 
@@ -507,17 +498,23 @@ void AteamParam::onSave(wxCommandEvent &event)
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void AteamParam::onReset(wxCommandEvent &event)
+void AteamParam::onResetClick(wxCommandEvent &event)
 {
-    AteamParam::defaultParams();
+    if (AteamParam::defaultParams() == IOPARAMS_SUCCESS)
+    {
+        SetStatusText(_("Default parameters loaded with success."), 0);
+    }
 }
 
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void AteamParam::onApply(wxCommandEvent &event)
+void AteamParam::onApplyClick(wxCommandEvent &event)
 {
+    MainFrame *main_frame = (MainFrame *) this->GetParent();
+    main_frame->onApplyClick();
+
     SetStatusText(_("BUTTON APPLY CLICKED..."), 0);
 }
 
@@ -525,7 +522,7 @@ void AteamParam::onApply(wxCommandEvent &event)
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void AteamParam::onHide(wxCommandEvent &event)
+void AteamParam::onHideClick(wxCommandEvent &event)
 {
     this->Hide();
 }
@@ -539,7 +536,7 @@ void AteamParam::onHide(wxCommandEvent &event)
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void AteamParam::defaultParams()
+int AteamParam::defaultParams()
 {
     char *model_path = IOParam::getExecutablePath();
     strncat(model_path, "/etc/ateam_param.model", 22);
@@ -551,15 +548,13 @@ void AteamParam::defaultParams()
         wxMessageBox(wxString(_("COD 001:\nFailed to loaded default parameters\n\n")) + 
         _("For details:\nhttp://www.inf.ufg.br/~diocleciano/ateamscp"),
         _("A-Team Param Error"), wxICON_ERROR|wxOK, this);
-    }
-    else
-    {
-        paramsToInterface(params);
-        SetStatusText(_("Default parameters loaded with success."), 0);
-    }
 
-    /* Libera a area da memoria ocupada pelo vetor params. */
-    if (params != NULL) free(params);
+        return IOPARAMS_FAILURE;
+    }
+    else paramsToInterface(params);
+
+    free(params);
+    return IOPARAMS_SUCCESS;
 }
 
 /* ------------------------------------------------------------------------------------- */
