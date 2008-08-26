@@ -58,7 +58,12 @@ int *IOParam::readParams(const char *file_name)
     /* Recebe os valores do parametros e os atribui as posicoes do vetor. */
     for (int count = 1; count < 24; count++)
     {
-        fscanf(file, "%d", &params[count]);
+        if (fscanf(file, "%d", &params[count]) == EOF)
+        {
+            params[0] = IOPARAMS_FAILURE;
+            return params;
+        }
+
         fgets(strin, 100, file);
     }
 

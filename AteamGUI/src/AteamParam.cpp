@@ -23,16 +23,6 @@
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
 
-/*
-BEGIN_EVENT_TABLE(AteamParam, wxFrame)
-    EVT_BUTTON(111, AteamParam::on_open_click)
-    EVT_BUTTON(112, AteamParam::on_save_click)
-    EVT_BUTTON(113, AteamParam::on_reset_click)
-    EVT_BUTTON(114, AteamParam::on_apply_click)
-    EVT_BUTTON(115, AteamParam::on_hide_click)
-END_EVENT_TABLE()
-*/
-
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
@@ -427,9 +417,8 @@ void AteamParam::onOpenClick(wxCommandEvent &event)
         int *params = IOParam::readParams(fname.mb_str(wxConvUTF8));
         if (params == NULL || params[0] == IOPARAMS_FAILURE)
         {
-        /** ***************************** MENSAGENS DE ERRO *************************************/
             wxMessageBox(
-                _("COD 001:\nFailed to open file \"") + fname.AfterLast('/') + _("\"\n\n") +
+                _("COD 101:\nFailed to open file \"") + fname.AfterLast('/') + _("\"\n\n") +
                 _("For details:\nhttp://www.inf.ufg.br/~diocleciano/ateamscp"),
                 _("A-Team Param Error"), wxICON_ERROR|wxOK, this
             );
@@ -476,10 +465,9 @@ void AteamParam::onSaveClick(wxCommandEvent &event)
 
         if (IOParam::writeParams(fname.mb_str(wxConvUTF8), params) == IOPARAMS_FAILURE)
         {
-        /** ***************************** MENSAGENS DE ERRO *************************************/
             wxMessageBox(
-                _("COD 001:\nFailed to save file \"") + fname.AfterLast('/') +
-                _("\"\n\n") + _("For details:\nhttp://www.inf.ufg.br/~diocleciano/ateamscp"),
+                _("COD 102:\nFailed to save file \"") + fname.AfterLast('/') + _("\"\n\n") +
+                _("For details:\nhttp://www.inf.ufg.br/~diocleciano/ateamscp"),
                 _("A-Team Param Error"), wxICON_ERROR|wxOK, this
             );
         }
@@ -544,8 +532,7 @@ int AteamParam::defaultParams()
 
     if (params == NULL || params[0] == IOPARAMS_FAILURE)
     {
-        /** ***************************** MENSAGENS DE ERRO *************************************/
-        wxMessageBox(wxString(_("COD 001:\nFailed to loaded default parameters\n\n")) + 
+        wxMessageBox(wxString(_("COD 103:\nFailed to loaded default parameters\n\n")) + 
         _("For details:\nhttp://www.inf.ufg.br/~diocleciano/ateamscp"),
         _("A-Team Param Error"), wxICON_ERROR|wxOK, this);
 
