@@ -23,6 +23,8 @@
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
 
+wxTimer *status_bar_timer;
+
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
@@ -46,6 +48,11 @@ AteamParam::AteamParam(
     Connect(113, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onResetClick));
     Connect(114, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onApplyClick));
     Connect(115, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onHideClick));
+
+    status_bar_timer = new wxTimer(this, 216);
+    Connect(216, wxEVT_TIMER, wxCommandEventHandler(AteamParam::onTimerEvent));
+
+    Connect(wxEVT_CLOSE_WINDOW, wxCommandEventHandler(AteamParam::onCloseWindow));
 
     button_static_line_01 = new wxStaticLine(this, wxID_ANY);
 
@@ -327,72 +334,119 @@ void AteamParam::do_layout()
 
     main_grid_sizer->Add(button_grid_sizer, 1, wxALL|wxEXPAND, 4);
     main_grid_sizer->Add(button_static_line_01, 0, wxLEFT|wxRIGHT|wxBOTTOM|wxEXPAND, 4);
+
     check_grid_sizer_01->Add(dual_worst_checkbox, 0, 0, 0);
     check_grid_sizer_01->Add(primal_worst_checkbox, 0, 0, 0);
     check_grid_sizer_01->Add(random_init_mp_checkbox, 0, 0, 0);
+
     check_grid_sizer_main->Add(check_grid_sizer_01, 1, wxLEFT|wxRIGHT|wxTOP|wxEXPAND, 3);
     check_grid_sizer_main->Add(check_static_line_01, 0, wxALL|wxEXPAND, 4);
+
     check_grid_sizer_02->Add(random_primal_checkbox, 0, wxLEFT|wxRIGHT, 10);
     check_grid_sizer_02->Add(random_consensus_checkbox, 0, wxLEFT|wxRIGHT, 10);
     check_grid_sizer_02->Add(random_init_md_checkbox, 0, wxLEFT|wxRIGHT, 10);
+
     check_grid_sizer_main->Add(check_grid_sizer_02, 1, wxLEFT|wxRIGHT|wxTOP|wxEXPAND, 3);
     check_grid_sizer_main->Add(check_static_line_02, 0, wxALL|wxEXPAND, 4);
+
     check_grid_sizer_03->Add(random_dual_checkbox, 0, wxLEFT, 11);
     check_grid_sizer_03->Add(balas_ng_cut_checkbox, 0, wxLEFT, 11);
     check_grid_sizer_03->Add(equal_cost_sol_checkbox, 0, wxLEFT, 11);
+
     check_grid_sizer_main->Add(check_grid_sizer_03, 1, wxLEFT|wxRIGHT|wxTOP|wxEXPAND, 3);
+
     main_grid_sizer->Add(check_grid_sizer_main, 1, wxEXPAND, 0);
     main_grid_sizer->Add(check_static_line_03, 0, wxALL|wxEXPAND, 4);
+
     time_sleeping_grid_sizer->Add(time_sleeping_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     time_sleeping_grid_sizer->Add(time_sleeping_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_01->Add(time_sleeping_grid_sizer, 1, wxEXPAND, 0);
+
     max_len_dual_mem_grid_sizer->Add(max_len_dual_mem_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     max_len_dual_mem_grid_sizer->Add(max_len_dual_mem_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_01->Add(max_len_dual_mem_grid_sizer, 1, wxEXPAND, 0);
+
     max_len_primal_mem_grid_sizer->Add(max_len_primal_mem_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     max_len_primal_mem_grid_sizer->Add(max_len_primal_mem_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_01->Add(max_len_primal_mem_grid_sizer, 1, wxEXPAND, 0);
+
     max_len_cut_mem_grid_sizer->Add(max_len_cut_mem_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     max_len_cut_mem_grid_sizer->Add(max_len_cut_mem_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_01->Add(max_len_cut_mem_grid_sizer, 1, wxEXPAND, 0);
+
     len_hash_tab_grid_sizer->Add(len_hash_tab_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     len_hash_tab_grid_sizer->Add(len_hash_tab_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_01->Add(len_hash_tab_grid_sizer, 1, wxEXPAND, 0);
+
     cut_sof_sol_grid_sizer->Add(cut_sof_sol_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     cut_sof_sol_grid_sizer->Add(cut_sof_sol_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_01->Add(cut_sof_sol_grid_sizer, 1, wxEXPAND, 0);
+
     max_cut_gen_grid_sizer->Add(max_cut_gen_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     max_cut_gen_grid_sizer->Add(max_cut_gen_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_01->Add(max_cut_gen_grid_sizer, 1, wxEXPAND, 0);
+
     spin_grid_sizer_main->Add(spin_grid_sizer_01, 1, wxLEFT|wxRIGHT|wxBOTTOM|wxEXPAND, 5);
     spin_grid_sizer_main->Add(spin_static_line_01, 0, wxEXPAND, 0);
+
     min_change_grid_sizer->Add(min_change_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     min_change_grid_sizer->Add(min_change_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_02->Add(min_change_grid_sizer, 1, wxEXPAND, 0);
+
     max_exe_time_grid_sizer->Add(max_exe_time_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     max_exe_time_grid_sizer->Add(max_exe_time_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_02->Add(max_exe_time_grid_sizer, 1, wxEXPAND, 0);
+
     reduc_perc_grid_sizer->Add(reduc_perc_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     reduc_perc_grid_sizer->Add(reduc_perc_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_02->Add(reduc_perc_grid_sizer, 1, wxEXPAND, 0);
+
     restr_value_grid_sizer->Add(restr_value_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     restr_value_grid_sizer->Add(restr_value_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_02->Add(restr_value_grid_sizer, 1, wxEXPAND, 0);
+
     tabu_iterations_grid_sizer->Add(tabu_iterations_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     tabu_iterations_grid_sizer->Add(tabu_iterations_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_02->Add(tabu_iterations_grid_sizer, 1, wxEXPAND, 0);
+
     max_sol_dual_ag_grid_sizer->Add(max_sol_dual_ag_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     max_sol_dual_ag_grid_sizer->Add(max_sol_dual_ag_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_02->Add(max_sol_dual_ag_grid_sizer, 1, wxEXPAND, 0);
+
     max_sol_primal_ag_grid_sizer->Add(max_sol_primal_ag_label, 0, wxALIGN_CENTER_VERTICAL, 0);
     max_sol_primal_ag_grid_sizer->Add(max_sol_primal_ag_spin_ctrl, 0, 0, 0);
+
     spin_grid_sizer_02->Add(max_sol_primal_ag_grid_sizer, 1, wxEXPAND, 0);
+
     spin_grid_sizer_main->Add(spin_grid_sizer_02, 1, wxLEFT|wxRIGHT|wxBOTTOM|wxEXPAND, 5);
     main_grid_sizer->Add(spin_grid_sizer_main, 1, wxALL|wxEXPAND, 2);
 
     SetSizer(main_grid_sizer);
     main_grid_sizer->Fit(this);
     Layout();
+}
+
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
+void AteamParam::onTimerEvent(wxCommandEvent &event)
+{
+    SetStatusText(_(""), 0);
+    status_bar_timer->Stop();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -405,8 +459,6 @@ void AteamParam::do_layout()
 /* ------------------------------------------------------------------------------------- */
 void AteamParam::onOpenClick(wxCommandEvent &event)
 {
-    SetStatusText(_(""), 0);
-
     wxString fname = wxFileSelector(
         _("Open Ateam-Params File"), (const wxChar *) NULL, (const wxChar *) NULL,
         _("atp"), _("Ateams-Params Files (*.atp)|*.atp"), wxOPEN, this
@@ -427,6 +479,7 @@ void AteamParam::onOpenClick(wxCommandEvent &event)
         {
             paramsToInterface(params);
             SetStatusText(_("File \"") + fname.AfterLast('/') + _("\" loaded with success."), 0);
+            status_bar_timer->Start(STATUS_BAR_LIVE);
         }
 
         free(params);
@@ -443,8 +496,6 @@ void AteamParam::onOpenClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void AteamParam::onSaveClick(wxCommandEvent &event)
 {
-    SetStatusText(_(""), 0);
-
     wxString fname = wxFileSelector(
         _("Save Ateam_params File"), (const wxChar *) NULL, (const wxChar *) NULL,
         _("atp"), _("Ateams-Params Files (*.atp)|*.atp"), wxSAVE, this
@@ -474,6 +525,7 @@ void AteamParam::onSaveClick(wxCommandEvent &event)
         else
         {
             SetStatusText(_("File \"") + fname.AfterLast('/') + _("\" saved with success."), 0);
+            status_bar_timer->Start(STATUS_BAR_LIVE);
         }
 
         if (params != NULL) free(params);
@@ -491,6 +543,7 @@ void AteamParam::onResetClick(wxCommandEvent &event)
     if (AteamParam::defaultParams() == IOPARAMS_SUCCESS)
     {
         SetStatusText(_("Default parameters loaded with success."), 0);
+        status_bar_timer->Start(STATUS_BAR_LIVE);
     }
 }
 
@@ -504,6 +557,7 @@ void AteamParam::onApplyClick(wxCommandEvent &event)
     main_frame->onApplyClick();
 
     SetStatusText(_("BUTTON APPLY CLICKED..."), 0);
+    status_bar_timer->Start(STATUS_BAR_LIVE);
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -622,6 +676,17 @@ int *AteamParam::interfaceToParams()
     }
 
     return params;
+}
+
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
+void AteamParam::onCloseWindow(wxCommandEvent &event)
+{
+    printf("EXIT...\n");
+    status_bar_timer->Stop();
+    Destroy();
 }
 
 /* ------------------------------------------------------------------------------------- */

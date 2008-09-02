@@ -29,7 +29,7 @@
 MainFrame::MainFrame(
     wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style
 ):wxFrame(
-    parent, id, title, pos, size, wxDEFAULT_FRAME_STYLE
+    parent, id, title, pos, size, wxICONIZE|wxCAPTION|wxMINIMIZE|wxCLOSE_BOX|wxMINIMIZE_BOX
 )
 {
     main_frame_statusbar = CreateStatusBar(1, 0);

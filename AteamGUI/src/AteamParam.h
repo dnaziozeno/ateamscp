@@ -24,6 +24,8 @@
 #include <wx/spinctrl.h>
 #include <wx/statline.h>
 
+#define STATUS_BAR_LIVE 5000
+
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
@@ -44,10 +46,13 @@ private:
     void onResetClick(wxCommandEvent &event);
     void onApplyClick(wxCommandEvent &event);
     void onHideClick(wxCommandEvent &event);
+    void onTimerEvent(wxCommandEvent &event);
 
     int defaultParams();
     void paramsToInterface(int *params);
     int *interfaceToParams();
+
+    void onCloseWindow(wxCommandEvent &event);
 
 protected:
     wxStatusBar *ateam_param_statusbar;
