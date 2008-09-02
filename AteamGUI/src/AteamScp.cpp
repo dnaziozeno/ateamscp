@@ -33,7 +33,7 @@ IMPLEMENT_APP(AteamScp)
 bool AteamScp::OnInit()
 {
     wxInitAllImageHandlers();
-    MainFrame* main_frame = new MainFrame(NULL, wxID_ANY, wxEmptyString, wxPoint(50, 70));
+    MainFrame* main_frame = new MainFrame(NULL, wxID_ANY, wxEmptyString, wxPoint(50, 100));
     SetTopWindow(main_frame);
     main_frame->Show();
     return true;

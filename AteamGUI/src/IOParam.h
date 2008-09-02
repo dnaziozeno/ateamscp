@@ -40,8 +40,8 @@
 class IOParam {
 
 public:
-    static int *readParams(const char *file_name);
-    static int writeParams(const char *file_name, int *params);
+    static int *readParams(const char *file_name, int nparams);
+    static int writeParams(const char *file_name, int *params, int nparams);
     static char *getExecutablePath();
 };
 

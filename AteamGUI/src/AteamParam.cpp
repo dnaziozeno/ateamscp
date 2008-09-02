@@ -466,7 +466,7 @@ void AteamParam::onOpenClick(wxCommandEvent &event)
 
     if (!fname.empty())
     {
-        int *params = IOParam::readParams(fname.mb_str(wxConvUTF8));
+        int *params = IOParam::readParams(fname.mb_str(wxConvUTF8), 23);
         if (params == NULL || params[0] == IOPARAMS_FAILURE)
         {
             wxMessageBox(
@@ -514,7 +514,7 @@ void AteamParam::onSaveClick(wxCommandEvent &event)
             ) == wxNO) return;
         }
 
-        if (IOParam::writeParams(fname.mb_str(wxConvUTF8), params) == IOPARAMS_FAILURE)
+        if (IOParam::writeParams(fname.mb_str(wxConvUTF8), params, 23) == IOPARAMS_FAILURE)
         {
             wxMessageBox(
                 _("COD 102:\nFailed to save file \"") + fname.AfterLast('/') + _("\"\n\n") +
@@ -582,7 +582,7 @@ int AteamParam::defaultParams()
 {
     char *model_path = IOParam::getExecutablePath();
     strncat(model_path, "/etc/ateam_param.model", 22);
-    int *params = IOParam::readParams(model_path);
+    int *params = IOParam::readParams(model_path, 23);
 
     if (params == NULL || params[0] == IOPARAMS_FAILURE)
     {

@@ -33,11 +33,11 @@
 /* PARAMETROS:                                                                           */
 /* const char *file_name - Caminho do arquivo de parametros de configuracao.             */
 /* ------------------------------------------------------------------------------------- */
-int *IOParam::readParams(const char *file_name)
+int *IOParam::readParams(const char *file_name, int nparams)
 {
     FILE *file;
     char *strin = (char *) malloc(128 * sizeof(char));
-    int *params = (int *) malloc(24 * sizeof(int));
+    int *params = (int *) malloc((nparams + 1) * sizeof(int));
 
     if (file_name == NULL)
     {
@@ -56,7 +56,7 @@ int *IOParam::readParams(const char *file_name)
     for (int count = 0; count < 8; count++) fgets(strin, 100, file);
 
     /* Recebe os valores do parametros e os atribui as posicoes do vetor. */
-    for (int count = 1; count < 24; count++)
+    for (int count = 1; count < nparams + 1; count++)
     {
         if (fscanf(file, "%d", &params[count]) == EOF)
         {
@@ -89,7 +89,7 @@ int *IOParam::readParams(const char *file_name)
 /* const char *file_name - Caminho do arquivo de parametros de configuracao.             */
 /* int *params - Ponteiro para o vetor de parametros do A-Team.                          */
 /* ------------------------------------------------------------------------------------- */
-int IOParam::writeParams(const char *file_name, int *params)
+int IOParam::writeParams(const char *file_name, int *params, int nparams)
 {
     FILE *model_file, *new_file;
     char *strin = (char *) malloc(128 * sizeof(char));
@@ -115,7 +115,7 @@ int IOParam::writeParams(const char *file_name, int *params)
 
     /* Escreve os parametros e os comentarios correspondentes, os */
     /* quais estao definidos no modelo de arquivo de parametros.  */
-    for (int count = 1; count < 24; count++)
+    for (int count = 1; count < nparams + 1; count++)
     {
         fscanf(model_file, "%*d");
         fgets(strin, 100, model_file);

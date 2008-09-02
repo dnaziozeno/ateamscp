@@ -16,6 +16,7 @@
 /* ------------------------------------------------------------------------------------- */
 
 #include "MainFrame.h"
+#include "InitMemories.h"
 #include "AteamParam.h"
 
 /* ------------------------------------------------------------------------------------- */
@@ -115,8 +116,8 @@ void MainFrame::do_layout()
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::onStartClick(wxCommandEvent &event)
 {
-    AteamParam *ateam_param = new AteamParam(this, wxID_ANY, wxEmptyString, wxPoint(400, 70));
-    ateam_param->Show();
+    InitMemories *init_memories = new InitMemories(this, wxID_ANY, wxEmptyString, wxPoint(100, 250));
+    init_memories->Show();
 }
 
 /* ------------------------------------------------------------------------------------- */

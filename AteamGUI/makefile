@@ -26,11 +26,14 @@ begin:
 
 main: ./bin/ateam-scp
 	
-./bin/ateam-scp: ./obj/AteamParam.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
-	$(CC) $(CFLAGS) ./obj/AteamParam.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o $(WXLIBS) -o ./bin/ateam-scp
+./bin/ateam-scp: ./obj/AteamParam.o ./obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
+	$(CC) $(CFLAGS) ./obj/AteamParam.o ./obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o $(WXLIBS) -o ./bin/ateam-scp
 	
 ./obj/AteamParam.o: ./src/AteamParam.cpp ./src/AteamParam.h
 	$(CC) $(CFLAGS) ./src/AteamParam.cpp $(WXFLAGS) -c -o ./obj/AteamParam.o
+	
+./obj/InitMemories.o: ./src/InitMemories.cpp ./src/InitMemories.h
+	$(CC) $(CFLAGS) ./src/InitMemories.cpp $(WXFLAGS) -c -o ./obj/InitMemories.o
 	
 ./obj/MainFrame.o: ./src/MainFrame.cpp ./src/MainFrame.h
 	$(CC) $(CFLAGS) ./src/MainFrame.cpp $(WXFLAGS) -c -o ./obj/MainFrame.o
@@ -54,6 +57,7 @@ clean:
 	@$(ECHO) "================================"
 	
 	$(REMOVE) ./obj/AteamParam.o
+	$(REMOVE) ./obj/InitMemories.o
 	$(REMOVE) ./obj/MainFrame.o
 	$(REMOVE) ./obj/IOParam.o
 	$(REMOVE) ./obj/AteamScp.o
