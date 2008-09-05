@@ -16,8 +16,8 @@
 /* ------------------------------------------------------------------------------------- */
 
 #include "AteamParam.h"
-#include "IOParam.h"
-#include "MainFrame.h"
+#include "../../../include/IOParam.h"
+#include "../../../include/MainFrame.h"
 
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
@@ -510,7 +510,7 @@ void AteamParam::onSaveClick(wxCommandEvent &event)
         {
             if (wxMessageBox(
                 _("The file ") + fname + _("\nalready exists. Do you want to overwrite it?"),
-                _("A-Team Param Error"), wxICON_QUESTION|wxYES_NO, this
+                _("A-Team Param Warning"), wxICON_QUESTION|wxYES_NO, this
             ) == wxNO) return;
         }
 

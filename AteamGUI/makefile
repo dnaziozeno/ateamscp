@@ -15,25 +15,39 @@ WXLIBS = `wx-config --libs`
 ECHO = echo
 REMOVE = rm -rf
 
-all: begin main end
-	
+MODULE = 
 
+ifneq ($(MODULE), )
+all: clear-dep begin project-all end
+else
+all: begin project-main end
+endif
+	
+clear-dep:
+	@$(ECHO) ""
+	@$(ECHO) "Removing files:"
+	@$(ECHO) "================================"
+	
+	$(REMOVE) ./bin/ateam-scp
+	
 begin:
 	@$(ECHO) ""
 	@$(ECHO) "Building Project Ateam-SCP:"
 	@$(ECHO) "================================"
 	
-
-main: ./bin/ateam-scp
 	
-./bin/ateam-scp: ./obj/AteamParam.o ./obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
-	$(CC) $(CFLAGS) ./obj/AteamParam.o ./obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o $(WXLIBS) -o ./bin/ateam-scp
+project-all: ./bin/ateam-scp
+project-main: ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
 	
-./obj/AteamParam.o: ./src/AteamParam.cpp ./src/AteamParam.h
-	$(CC) $(CFLAGS) ./src/AteamParam.cpp $(WXFLAGS) -c -o ./obj/AteamParam.o
 	
-./obj/InitMemories.o: ./src/InitMemories.cpp ./src/InitMemories.h
-	$(CC) $(CFLAGS) ./src/InitMemories.cpp $(WXFLAGS) -c -o ./obj/InitMemories.o
+./bin/ateam-scp: ./plugins/$(MODULE)/obj/AteamParam.o ./plugins/$(MODULE)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
+	$(CC) $(CFLAGS) ./plugins/$(MODULE)/obj/AteamParam.o ./plugins/$(MODULE)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o $(WXLIBS) -o ./bin/ateam-scp
+	
+./plugins/$(MODULE)/obj/AteamParam.o: ./plugins/$(MODULE)/src/AteamParam.cpp ./plugins/$(MODULE)/src/AteamParam.h
+	$(CC) $(CFLAGS) ./plugins/$(MODULE)/src/AteamParam.cpp $(WXFLAGS) -c -o ./plugins/$(MODULE)/obj/AteamParam.o
+	
+./plugins/$(MODULE)/obj/InitMemories.o: ./plugins/$(MODULE)/src/InitMemories.cpp ./plugins/$(MODULE)/src/InitMemories.h
+	$(CC) $(CFLAGS) ./plugins/$(MODULE)/src/InitMemories.cpp $(WXFLAGS) -c -o ./plugins/$(MODULE)/obj/InitMemories.o
 	
 ./obj/MainFrame.o: ./src/MainFrame.cpp ./src/MainFrame.h
 	$(CC) $(CFLAGS) ./src/MainFrame.cpp $(WXFLAGS) -c -o ./obj/MainFrame.o
@@ -44,20 +58,23 @@ main: ./bin/ateam-scp
 ./obj/AteamScp.o: ./src/AteamScp.cpp
 	$(CC) $(CFLAGS) ./src/AteamScp.cpp $(WXFLAGS) -c -o ./obj/AteamScp.o
 	
-
+	
 end:
 	@$(ECHO) ""
 	@$(ECHO) "Ready!"
 	@$(ECHO) ""
 	
-
-clean:
+	
+clear:
 	@$(ECHO) ""
 	@$(ECHO) "Removing files:"
 	@$(ECHO) "================================"
 	
-	$(REMOVE) ./obj/AteamParam.o
-	$(REMOVE) ./obj/InitMemories.o
+ifneq ($(MODULE), )
+	$(REMOVE) ./plugins/$(MODULE)/obj/AteamParam.o
+	$(REMOVE) ./plugins/$(MODULE)/obj/InitMemories.o
+endif
+	
 	$(REMOVE) ./obj/MainFrame.o
 	$(REMOVE) ./obj/IOParam.o
 	$(REMOVE) ./obj/AteamScp.o
@@ -67,15 +84,15 @@ clean:
 	@$(ECHO) "Ready!"
 	@$(ECHO) ""
 	
-
+	
 install:
 	
 	
-
+	
 uninstall:
 	
 	
-
+	
 help:
 	@$(ECHO) ""
 	@$(ECHO) "Ateam-SCP Make Help"
