@@ -1,2 +1,4 @@
 bin/*
 obj/*
+modules/scp/obj/*
+modules/sample/obj/*
