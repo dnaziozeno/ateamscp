@@ -15,9 +15,9 @@ WXLIBS = `wx-config --libs`
 ECHO = echo
 REMOVE = rm -rf
 
-MODULE = 
+module = 
 
-ifneq ($(MODULE), )
+ifneq ($(module), )
 all: clear-dep begin project-all end
 else
 all: begin project-main end
@@ -40,14 +40,14 @@ project-all: ./bin/ateam-scp
 project-main: ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
 	
 	
-./bin/ateam-scp: ./plugins/$(MODULE)/obj/AteamParam.o ./plugins/$(MODULE)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
-	$(CC) $(CFLAGS) ./plugins/$(MODULE)/obj/AteamParam.o ./plugins/$(MODULE)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o $(WXLIBS) -o ./bin/ateam-scp
+./bin/ateam-scp: ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
+	$(CC) $(CFLAGS) ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o $(WXLIBS) -o ./bin/ateam-scp
 	
-./plugins/$(MODULE)/obj/AteamParam.o: ./plugins/$(MODULE)/src/AteamParam.cpp ./plugins/$(MODULE)/src/AteamParam.h
-	$(CC) $(CFLAGS) ./plugins/$(MODULE)/src/AteamParam.cpp $(WXFLAGS) -c -o ./plugins/$(MODULE)/obj/AteamParam.o
+./modules/$(module)/obj/AteamParam.o: ./modules/$(module)/src/AteamParam.cpp ./modules/$(module)/src/AteamParam.h
+	$(CC) $(CFLAGS) ./modules/$(module)/src/AteamParam.cpp $(WXFLAGS) -c -o ./modules/$(module)/obj/AteamParam.o
 	
-./plugins/$(MODULE)/obj/InitMemories.o: ./plugins/$(MODULE)/src/InitMemories.cpp ./plugins/$(MODULE)/src/InitMemories.h
-	$(CC) $(CFLAGS) ./plugins/$(MODULE)/src/InitMemories.cpp $(WXFLAGS) -c -o ./plugins/$(MODULE)/obj/InitMemories.o
+./modules/$(module)/obj/InitMemories.o: ./modules/$(module)/src/InitMemories.cpp ./modules/$(module)/src/InitMemories.h
+	$(CC) $(CFLAGS) ./modules/$(module)/src/InitMemories.cpp $(WXFLAGS) -c -o ./modules/$(module)/obj/InitMemories.o
 	
 ./obj/MainFrame.o: ./src/MainFrame.cpp ./src/MainFrame.h
 	$(CC) $(CFLAGS) ./src/MainFrame.cpp $(WXFLAGS) -c -o ./obj/MainFrame.o
@@ -70,9 +70,9 @@ clear:
 	@$(ECHO) "Removing files:"
 	@$(ECHO) "================================"
 	
-ifneq ($(MODULE), )
-	$(REMOVE) ./plugins/$(MODULE)/obj/AteamParam.o
-	$(REMOVE) ./plugins/$(MODULE)/obj/InitMemories.o
+ifneq ($(module), )
+	$(REMOVE) ./modules/$(module)/obj/AteamParam.o
+	$(REMOVE) ./modules/$(module)/obj/InitMemories.o
 endif
 	
 	$(REMOVE) ./obj/MainFrame.o
