@@ -7,46 +7,35 @@ InitMemories::InitMemories(wxWindow* parent, int id, const wxString& title, cons
     wxFrame(parent, id, title, pos, size, wxICONIZE|wxCAPTION|wxMINIMIZE|wxCLOSE_BOX|wxMINIMIZE_BOX)
 {
     init_memories_statusbar = CreateStatusBar(1, 0);
-
     apply_button = new wxButton(this, 120, _("Apply"));
     configure_button = new wxButton(this, 121, _("Configure"));
     cancel_button = new wxButton(this, 122, _("Cancel"));
-
     top_static_line = new wxStaticLine(this, wxID_ANY);
-
     init_md_button = new wxButton(this, 123, _("Init MD"));
-    init_md_gauge = new wxGauge(this, wxID_ANY, 10, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL|wxGA_SMOOTH);
-
+    const wxString *init_md_combo_box_choices = NULL;
+    init_md_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, init_md_combo_box_choices, wxCB_DROPDOWN);
     three_opt_button = new wxButton(this, 124, _("Add 3OPT"));
     const wxString *three_opt_combo_box_choices = NULL;
     three_opt_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, three_opt_combo_box_choices, wxCB_DROPDOWN);
-
     subg_button = new wxButton(this, 125, _("Add SUBG"));
     const wxString *subg_combo_box_choices = NULL;
     subg_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, subg_combo_box_choices, wxCB_DROPDOWN);
-
     mid_static_line = new wxStaticLine(this, wxID_ANY);
-
     init_mp_button = new wxButton(this, 126, _("Init MP"));
-    init_mp_gauge = new wxGauge(this, wxID_ANY, 10, wxDefaultPosition, wxDefaultSize, wxGA_HORIZONTAL|wxGA_SMOOTH);
-
+    const wxString *init_mp_combo_box_choices = NULL;
+    init_mp_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, init_mp_combo_box_choices, wxCB_DROPDOWN);
     ls_button = new wxButton(this, 127, _("Add LS"));
     const wxString *ls_combo_box_choices = NULL;
     ls_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, ls_combo_box_choices, wxCB_DROPDOWN);
-
     pert_button = new wxButton(this, 128, _("Add PERT"));
     const wxString *pert_combo_box_choices = NULL;
     pert_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, pert_combo_box_choices, wxCB_DROPDOWN);
-
     cons_button = new wxButton(this, 129, _("Add CONS"));
     const wxString *cons_combo_box_choices = NULL;
     cons_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, cons_combo_box_choices, wxCB_DROPDOWN);
 
     set_properties();
     do_layout();
-
-    init_md_gauge->SetRange(50);
-    init_mp_gauge->SetRange(50);
 
     timerMD = new wxTimer(this, 990);
     timerMP = new wxTimer(this, 991);
@@ -80,36 +69,31 @@ InitMemories::InitMemories(wxWindow* parent, int id, const wxString& title, cons
 
 void InitMemories::onTimerMDEvent(wxCommandEvent &event)
 {
-    static int i = 0;
-    init_md_gauge->SetValue(i++);
+    three_opt_button->Enable();
+    three_opt_combo_box->Enable();
 
-    if (i > 50)
-    {
-        three_opt_button->Enable();
-        three_opt_combo_box->Enable();
-        timerMD->Stop();
-    }
+    init_md_button->Disable();
+    init_md_combo_box->Disable();
+
+    timerMD->Stop();
 }
 
 void InitMemories::onTimerMPEvent(wxCommandEvent &event)
 {
-    static int i = 0;
-    init_mp_gauge->SetValue(i++);
+    subg_button->Enable();
+    subg_combo_box->Enable();
 
-    if (i > 50)
-    {
-        subg_button->Enable();
-        subg_combo_box->Enable();
+    ls_button->Enable();
+    ls_combo_box->Enable();
+    pert_button->Enable();
+    pert_combo_box->Enable();
+    cons_button->Enable();
+    cons_combo_box->Enable();
 
-        ls_button->Enable();
-        ls_combo_box->Enable();
-        pert_button->Enable();
-        pert_combo_box->Enable();
-        cons_button->Enable();
-        cons_combo_box->Enable();
+    init_mp_button->Disable();
+    init_mp_combo_box->Disable();
 
-        timerMP->Stop();
-    }
+    timerMP->Stop();
 }
 
 void InitMemories::onApplyClick(wxCommandEvent &event)
@@ -129,10 +113,17 @@ void InitMemories::onCancelClick(wxCommandEvent &event)
 
 void InitMemories::onInitMDClick(wxCommandEvent &event)
 {
+
+    wxMessageBox(
+        wxString(_("COD 201:\nInitMD could not start. ")) +
+        _("Check the IP: ") + init_md_combo_box->GetValue() +
+        _("\n\nFor details:\nhttp://www.inf.ufg.br/~diocleciano/ateamscp"),
+        _("InitMemories Error"), wxICON_ERROR|wxOK, this
+    );
+
     timerMD->Start(100, false);
 
     //system("mpd &");
-
     //system("mpiexec -n 1 ../AteamApp/initMD 1 ../20_40_20 ../");
 }
 
@@ -167,7 +158,7 @@ void InitMemories::set_properties()
     int init_memories_statusbar_widths[] = { -1 };
     init_memories_statusbar->SetStatusWidths(1, init_memories_statusbar_widths);
     const wxString init_memories_statusbar_fields[] = {
-        _("init_memories_statusbar")
+        _("")
     };
     for(int i = 0; i < init_memories_statusbar->GetFieldsCount(); ++i) {
         init_memories_statusbar->SetStatusText(init_memories_statusbar_fields[i], i);
@@ -176,13 +167,13 @@ void InitMemories::set_properties()
     configure_button->SetMinSize(wxSize(90, 27));
     cancel_button->SetMinSize(wxSize(90, 27));
     init_md_button->SetMinSize(wxSize(90, 27));
-    init_md_gauge->SetMinSize(wxSize(181, 27));
+    init_md_combo_box->SetMinSize(wxSize(181, 27));
     three_opt_button->SetMinSize(wxSize(90, 27));
     three_opt_combo_box->SetMinSize(wxSize(181, 27));
     subg_button->SetMinSize(wxSize(90, 27));
     subg_combo_box->SetMinSize(wxSize(181, 27));
     init_mp_button->SetMinSize(wxSize(90, 27));
-    init_mp_gauge->SetMinSize(wxSize(181, 27));
+    init_mp_combo_box->SetMinSize(wxSize(181, 27));
     ls_button->SetMinSize(wxSize(90, 27));
     ls_combo_box->SetMinSize(wxSize(181, 27));
     pert_button->SetMinSize(wxSize(90, 27));
@@ -204,7 +195,7 @@ void InitMemories::do_layout()
     main_grid_sizer->Add(grid_sizer_1, 1, wxLEFT|wxEXPAND, 2);
     main_grid_sizer->Add(top_static_line, 0, wxALL|wxEXPAND, 2);
     mid_buttons_grid_sizer->Add(init_md_button, 0, 0, 0);
-    mid_buttons_grid_sizer->Add(init_md_gauge, 0, 0, 0);
+    mid_buttons_grid_sizer->Add(init_md_combo_box, 0, 0, 0);
     mid_buttons_grid_sizer->Add(three_opt_button, 0, 0, 0);
     mid_buttons_grid_sizer->Add(three_opt_combo_box, 0, 0, 0);
     mid_buttons_grid_sizer->Add(subg_button, 0, 0, 0);
@@ -212,7 +203,7 @@ void InitMemories::do_layout()
     main_grid_sizer->Add(mid_buttons_grid_sizer, 1, wxALL|wxEXPAND, 2);
     main_grid_sizer->Add(mid_static_line, 0, wxALL|wxEXPAND, 2);
     down_grid_sizer->Add(init_mp_button, 0, 0, 0);
-    down_grid_sizer->Add(init_mp_gauge, 0, 0, 0);
+    down_grid_sizer->Add(init_mp_combo_box, 0, 0, 0);
     down_grid_sizer->Add(ls_button, 0, 0, 0);
     down_grid_sizer->Add(ls_combo_box, 0, 0, 0);
     down_grid_sizer->Add(pert_button, 0, 0, 0);
@@ -224,4 +215,3 @@ void InitMemories::do_layout()
     main_grid_sizer->Fit(this);
     Layout();
 }
-

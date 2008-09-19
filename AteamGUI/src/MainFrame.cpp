@@ -62,6 +62,9 @@ MainFrame::MainFrame(
 
     set_properties();
     do_layout();
+
+    //MODIFICAR DEPOIS...
+    onApplyClick();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -203,7 +206,7 @@ void MainFrame::onApplyClick()
     remove_button->Enable();
     edit_button->Enable();
 
-    start_button->Disable();
+    //start_button->Disable();
 }
 
 /* ------------------------------------------------------------------------------------- */

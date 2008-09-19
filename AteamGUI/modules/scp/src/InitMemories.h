@@ -34,14 +34,14 @@ protected:
     wxButton* cancel_button;
     wxStaticLine* top_static_line;
     wxButton* init_md_button;
-    wxGauge* init_md_gauge;
+    wxComboBox* init_md_combo_box;
     wxButton* three_opt_button;
     wxComboBox* three_opt_combo_box;
     wxButton* subg_button;
     wxComboBox* subg_combo_box;
     wxStaticLine* mid_static_line;
     wxButton* init_mp_button;
-    wxGauge* init_mp_gauge;
+    wxComboBox* init_mp_combo_box;
     wxButton* ls_button;
     wxComboBox* ls_combo_box;
     wxButton* pert_button;
@@ -49,6 +49,5 @@ protected:
     wxButton* cons_button;
     wxComboBox* cons_combo_box;
 };
-
 
 #endif // INITMEMORIES_H
