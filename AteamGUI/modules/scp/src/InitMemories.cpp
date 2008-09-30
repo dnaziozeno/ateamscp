@@ -1,5 +1,6 @@
 #include "InitMemories.h"
 #include "AteamParam.h"
+#include "../../../include/MainFrame.h"
 
 wxTimer *timerMP, *timerMD;
 
@@ -113,13 +114,17 @@ void InitMemories::onCancelClick(wxCommandEvent &event)
 
 void InitMemories::onInitMDClick(wxCommandEvent &event)
 {
-
+    /*
     wxMessageBox(
         wxString(_("COD 201:\nInitMD could not start. ")) +
         _("Check the IP: ") + init_md_combo_box->GetValue() +
         _("\n\nFor details:\nhttp://www.inf.ufg.br/~diocleciano/ateamscp"),
         _("InitMemories Error"), wxICON_ERROR|wxOK, this
     );
+    */
+
+    MainFrame *main_frame = (MainFrame *) this->GetParent();
+    //main_frame->onMemoriesInitMDClick();
 
     timerMD->Start(100, false);
 

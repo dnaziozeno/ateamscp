@@ -19,6 +19,11 @@
 #include "../include/InitMemories.h"
 #include "../include/AteamParam.h"
 
+
+extern "C" {
+    #include "initMD.c"
+}
+
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
@@ -33,6 +38,8 @@ MainFrame::MainFrame(
     parent, id, title, pos, size, wxICONIZE|wxCAPTION|wxMINIMIZE|wxCLOSE_BOX|wxMINIMIZE_BOX
 )
 {
+   // MPI_Init(0, NULL);
+
     main_frame_statusbar = CreateStatusBar(1, 0);
 
     start_button = new wxButton(this, 11, _("Start"));
@@ -63,8 +70,6 @@ MainFrame::MainFrame(
     set_properties();
     do_layout();
 
-    //MODIFICAR DEPOIS...
-    onApplyClick();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -119,8 +124,10 @@ void MainFrame::do_layout()
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::onStartClick(wxCommandEvent &event)
 {
-    InitMemories *init_memories = new InitMemories(this, wxID_ANY, wxEmptyString, wxPoint(100, 250));
-    init_memories->Show();
+    //InitMemories *init_memories = new InitMemories(this, wxID_ANY, wxEmptyString, wxPoint(100, 250));
+    initMD();
+
+    //init_memories->Show();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -134,10 +141,29 @@ void MainFrame::onStopClick(wxCommandEvent &event)
     add_button->Disable();
     remove_button->Disable();
     edit_button->Disable();
-
     start_button->Enable();
 
     team_tree_ctrl->DeleteAllItems();
+
+    MPI_Comm interComSpawn1, interComSpawn2, interComSpawn3;
+    int errcodes[1];
+
+    MPI_Comm_spawn(
+        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/stopATEAM",
+        MPI_ARGV_NULL, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn1, errcodes
+    );
+
+    MPI_Comm_spawn(
+        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/stopSERVER",
+        MPI_ARGV_NULL, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn2, errcodes
+    );
+
+    MPI_Comm_spawn(
+        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/stopFINAL",
+        MPI_ARGV_NULL, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn3, errcodes
+    );
+
+    MPI_Finalize();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -201,12 +227,39 @@ void MainFrame::onApplyClick()
     team_tree_ctrl->AddRoot(_T("A-Team Set Covering Problem"), -1, -1, NULL);
 
     stop_button->Enable();
-    plot_button->Enable();
-    add_button->Enable();
-    remove_button->Enable();
-    edit_button->Enable();
+    //plot_button->Enable();
+    //add_button->Enable();
+    //remove_button->Enable();
+    //edit_button->Enable();
 
     //start_button->Disable();
+}
+
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
+void MainFrame::initMD()
+{
+    char *args[4];
+
+
+    args[0] = (char *) malloc (512 * sizeof(char));
+    args[1] = (char *) malloc (512 * sizeof(char));
+    args[2] = (char *) malloc (512 * sizeof(char));
+    args[3] = (char *) malloc (512 * sizeof(char));
+
+    strcpy(args[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/initMD");
+    strcpy(args[1], "1");
+    strcpy(args[2], "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/20_40_20");
+    strcpy(args[3], "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/teste");
+
+    int com = InitMD(4, args);
+    MPI_Comm com1 = (MPI_Comm) com;
+
+    //MODIFICAR DEPOIS...
+    onApplyClick();
+
 }
 
 /* ------------------------------------------------------------------------------------- */
