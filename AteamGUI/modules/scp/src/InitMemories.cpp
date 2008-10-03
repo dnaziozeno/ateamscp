@@ -1,9 +1,18 @@
 #include "InitMemories.h"
 #include "AteamParam.h"
 #include "../../../include/MainFrame.h"
+#include "../../../include/IOParam.h"
+
+extern "C" {
+    #include "../../../../AteamMPI/initMD.c"
+}
 
 wxTimer *timerMP, *timerMD;
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 InitMemories::InitMemories(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
     wxFrame(parent, id, title, pos, size, wxICONIZE|wxCAPTION|wxMINIMIZE|wxCLOSE_BOX|wxMINIMIZE_BOX)
 {
@@ -68,6 +77,10 @@ InitMemories::InitMemories(wxWindow* parent, int id, const wxString& title, cons
     Connect(991, wxEVT_TIMER, wxCommandEventHandler(InitMemories::onTimerMPEvent));
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onTimerMDEvent(wxCommandEvent &event)
 {
     three_opt_button->Enable();
@@ -79,6 +92,10 @@ void InitMemories::onTimerMDEvent(wxCommandEvent &event)
     timerMD->Stop();
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onTimerMPEvent(wxCommandEvent &event)
 {
     subg_button->Enable();
@@ -97,21 +114,37 @@ void InitMemories::onTimerMPEvent(wxCommandEvent &event)
     timerMP->Stop();
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onApplyClick(wxCommandEvent &event)
 {
 
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onConfigureClick(wxCommandEvent &event)
 {
     AteamParam *ateam_param = new AteamParam(this, wxID_ANY, wxEmptyString, wxPoint(400, 100));
     ateam_param->Show();
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onCancelClick(wxCommandEvent &event)
 {
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onInitMDClick(wxCommandEvent &event)
 {
     /*
@@ -123,40 +156,87 @@ void InitMemories::onInitMDClick(wxCommandEvent &event)
     );
     */
 
-    MainFrame *main_frame = (MainFrame *) this->GetParent();
+    //MainFrame *main_frame = (MainFrame *) this->GetParent();
     //main_frame->onMemoriesInitMDClick();
 
-    timerMD->Start(100, false);
+    //timerMD->Start(100, false);
 
-    //system("mpd &");
-    //system("mpiexec -n 1 ../AteamApp/initMD 1 ../20_40_20 ../");
+    int argcInitMD = 4;
+    char *argvInitMD[4];
+
+    argvInitMD[0] = (char *) malloc (512 * sizeof(char));
+    argvInitMD[1] = (char *) malloc (512 * sizeof(char));
+    argvInitMD[2] = (char *) malloc (512 * sizeof(char));
+    argvInitMD[3] = (char *) malloc (512 * sizeof(char));
+
+    strcpy(argvInitMD[0], IOParam::getExecutablePath());
+    strcat(argvInitMD[0], "/../AteamMPI/initMD");
+
+    strcpy(argvInitMD[1], "1");
+
+    strcpy(argvInitMD[2], IOParam::getExecutablePath());
+    strcat(argvInitMD[2], "/../AteamMPI/20_40_20");
+
+    strcpy(argvInitMD[3], IOParam::getExecutablePath());
+    strcat(argvInitMD[3], "/../AteamMPI/teste");
+
+    int com = InitMD(4, argvInitMD);
+    MPI_Comm com1 = (MPI_Comm) com;
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onThreeOPTClick(wxCommandEvent &event)
 {
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onSubGClick(wxCommandEvent &event)
 {
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onInitMPClick(wxCommandEvent &event)
 {
     timerMP->Start(100, false);
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onLSClick(wxCommandEvent &event)
 {
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onPertClick(wxCommandEvent &event)
 {
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onConsClick(wxCommandEvent &event)
 {
 }
 
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::set_properties()
 {
     SetTitle(_("InitMemories"));
@@ -187,7 +267,10 @@ void InitMemories::set_properties()
     cons_combo_box->SetMinSize(wxSize(181, 27));
 }
 
-
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::do_layout()
 {
     wxFlexGridSizer* main_grid_sizer = new wxFlexGridSizer(5, 1, 2, 2);

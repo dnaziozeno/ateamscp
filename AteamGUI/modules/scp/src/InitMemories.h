@@ -1,6 +1,8 @@
 #include <wx/wx.h>
 #include <wx/image.h>
 
+#include <mpi.h>
+
 #ifndef INITMEMORIES_H
 #define INITMEMORIES_H
 

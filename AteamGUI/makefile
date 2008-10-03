@@ -41,16 +41,16 @@ project-main: ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
 	
 	
 ./bin/ateam-scp: ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
-	$(CC) $(CFLAGS) ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o ./src/grdual.o ./src/agentrot.o ./src/readsc.o ./src/readparam.o ./src/reduction.o $(WXLIBS) -o ./bin/ateam-scp
+	$(CC) $(CFLAGS) ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o ../AteamMPI/grdual.o ../AteamMPI/agentrot.o ../AteamMPI/readsc.o ../AteamMPI/readparam.o ../AteamMPI/reduction.o $(WXLIBS) -o ./bin/ateam-scp
 	
 ./modules/$(module)/obj/AteamParam.o: ./modules/$(module)/src/AteamParam.cpp ./modules/$(module)/src/AteamParam.h
 	$(CC) $(CFLAGS) ./modules/$(module)/src/AteamParam.cpp $(WXFLAGS) -c -o ./modules/$(module)/obj/AteamParam.o
 	
 ./modules/$(module)/obj/InitMemories.o: ./modules/$(module)/src/InitMemories.cpp ./modules/$(module)/src/InitMemories.h
-	$(CC) $(CFLAGS) ./modules/$(module)/src/InitMemories.cpp $(WXFLAGS) -c -o ./modules/$(module)/obj/InitMemories.o
+	$(CC) $(CFLAGS) ./modules/$(module)/src/InitMemories.cpp ../AteamMPI/initMD.o $(WXFLAGS) -c -o ./modules/$(module)/obj/InitMemories.o
 	
 ./obj/MainFrame.o: ./src/MainFrame.cpp ./src/MainFrame.h
-	$(CC) $(CFLAGS) ./src/MainFrame.cpp $(WXFLAGS) ./src/initMD.o -c -o ./obj/MainFrame.o
+	$(CC) $(CFLAGS) ./src/MainFrame.cpp $(WXFLAGS) -c -o ./obj/MainFrame.o
 	
 ./obj/IOParam.o: ./src/IOParam.cpp ./src/IOParam.h
 	$(CC) $(CFLAGS) ./src/IOParam.cpp $(WXFLAGS) -c -o ./obj/IOParam.o

@@ -16,14 +16,15 @@
 /* ------------------------------------------------------------------------------------- */
 
 #include "MainFrame.h"
+#include "IOParam.h"
 #include "../include/InitMemories.h"
 #include "../include/AteamParam.h"
 
-
+/*
 extern "C" {
     #include "initMD.c"
 }
-
+*/
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
@@ -124,10 +125,10 @@ void MainFrame::do_layout()
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::onStartClick(wxCommandEvent &event)
 {
-    //InitMemories *init_memories = new InitMemories(this, wxID_ANY, wxEmptyString, wxPoint(100, 250));
-    initMD();
+    InitMemories *init_memories = new InitMemories(this, wxID_ANY, wxEmptyString, wxPoint(100, 250));
+    init_memories->Show();
 
-    //init_memories->Show();
+    //initMD();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -241,25 +242,38 @@ void MainFrame::onApplyClick()
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::initMD()
 {
-    char *args[4];
+/*
+    printf("%s\n", IOParam::getExecutablePath());
 
+    char *args[4];
 
     args[0] = (char *) malloc (512 * sizeof(char));
     args[1] = (char *) malloc (512 * sizeof(char));
     args[2] = (char *) malloc (512 * sizeof(char));
     args[3] = (char *) malloc (512 * sizeof(char));
 
-    strcpy(args[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/initMD");
+    strcpy(args[0], IOParam::getExecutablePath());
+    strcat(args[0], "/../AteamMPI/initMD");
+
     strcpy(args[1], "1");
-    strcpy(args[2], "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/20_40_20");
-    strcpy(args[3], "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/teste");
+
+    strcpy(args[2], IOParam::getExecutablePath());
+    strcat(args[2], "/../AteamMPI/20_40_20");
+
+    strcpy(args[3], IOParam::getExecutablePath());
+    strcat(args[3], "/../AteamMPI/teste");
+
+    //strcpy(args[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/initMD");
+    //strcpy(args[1], "1");
+    //strcpy(args[2], "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/20_40_20");
+    //strcpy(args[3], "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/teste");
 
     int com = InitMD(4, args);
     MPI_Comm com1 = (MPI_Comm) com;
 
     //MODIFICAR DEPOIS...
     onApplyClick();
-
+*/
 }
 
 /* ------------------------------------------------------------------------------------- */
