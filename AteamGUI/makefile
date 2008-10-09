@@ -7,10 +7,11 @@ ARCH = linux
 # Solaris systems: ARCH=sun
 
 CC = mpicc
-CFLAGS = -g -Wall -D$(ARCH) -DMPICH_IGNORE_CXX_SEEK
+CFLAGS = -g -Wall -Wno-write-strings -D$(ARCH) -DMPICH_IGNORE_CXX_SEEK
 
 WXFLAGS = `wx-config --cxxflags`
 WXLIBS = `wx-config --libs`
+WXPLOTLIB = -lplot
 
 ECHO = echo
 REMOVE = rm -rf
@@ -37,11 +38,14 @@ begin:
 	
 	
 project-all: ./bin/ateam-scp
-project-main: ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
+project-main: ./obj/MainFrame.o ./obj/IOParam.o ./obj/Graph.o ./obj/AteamScp.o
 	
 	
-./bin/ateam-scp: ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o
-	$(CC) $(CFLAGS) ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/AteamScp.o ../AteamMPI/grdual.o ../AteamMPI/agentrot.o ../AteamMPI/readsc.o ../AteamMPI/readparam.o ../AteamMPI/reduction.o $(WXLIBS) -o ./bin/ateam-scp
+./bin/ateam-scp: ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/Graph.o ./obj/AteamScp.o
+	$(CC) $(CFLAGS) ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/Graph.o ./obj/AteamScp.o ../AteamMPI/grdual.o ../AteamMPI/agentrot.o ../AteamMPI/readsc.o ../AteamMPI/readparam.o ../AteamMPI/reduction.o $(WXLIBS) $(WXPLOTLIB) -o ./bin/ateam-scp 
+	
+./obj/Graph.o: ./src/Graph.cpp ./src/Graph.h
+	$(CC) $(CFLAGS) ./src/Graph.cpp $(WXFLAGS) -c -o ./obj/Graph.o
 	
 ./modules/$(module)/obj/AteamParam.o: ./modules/$(module)/src/AteamParam.cpp ./modules/$(module)/src/AteamParam.h
 	$(CC) $(CFLAGS) ./modules/$(module)/src/AteamParam.cpp $(WXFLAGS) -c -o ./modules/$(module)/obj/AteamParam.o
@@ -75,6 +79,7 @@ ifneq ($(module), )
 	$(REMOVE) ./modules/$(module)/obj/InitMemories.o
 endif
 	
+	$(REMOVE) ./obj/Graph.o
 	$(REMOVE) ./obj/MainFrame.o
 	$(REMOVE) ./obj/IOParam.o
 	$(REMOVE) ./obj/AteamScp.o

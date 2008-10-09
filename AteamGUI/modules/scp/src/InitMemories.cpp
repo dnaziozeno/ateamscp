@@ -81,6 +81,77 @@ InitMemories::InitMemories(wxWindow* parent, int id, const wxString& title, cons
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
+void InitMemories::set_properties()
+{
+    SetTitle(_("InitMemories"));
+    int init_memories_statusbar_widths[] = { -1 };
+    init_memories_statusbar->SetStatusWidths(1, init_memories_statusbar_widths);
+    const wxString init_memories_statusbar_fields[] = {
+        _("")
+    };
+    for(int i = 0; i < init_memories_statusbar->GetFieldsCount(); ++i) {
+        init_memories_statusbar->SetStatusText(init_memories_statusbar_fields[i], i);
+    }
+    apply_button->SetMinSize(wxSize(90, 27));
+    configure_button->SetMinSize(wxSize(90, 27));
+    cancel_button->SetMinSize(wxSize(90, 27));
+    init_md_button->SetMinSize(wxSize(90, 27));
+    init_md_combo_box->SetMinSize(wxSize(181, 27));
+    three_opt_button->SetMinSize(wxSize(90, 27));
+    three_opt_combo_box->SetMinSize(wxSize(181, 27));
+    subg_button->SetMinSize(wxSize(90, 27));
+    subg_combo_box->SetMinSize(wxSize(181, 27));
+    init_mp_button->SetMinSize(wxSize(90, 27));
+    init_mp_combo_box->SetMinSize(wxSize(181, 27));
+    ls_button->SetMinSize(wxSize(90, 27));
+    ls_combo_box->SetMinSize(wxSize(181, 27));
+    pert_button->SetMinSize(wxSize(90, 27));
+    pert_combo_box->SetMinSize(wxSize(181, 27));
+    cons_button->SetMinSize(wxSize(90, 27));
+    cons_combo_box->SetMinSize(wxSize(181, 27));
+}
+
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
+void InitMemories::do_layout()
+{
+    wxFlexGridSizer* main_grid_sizer = new wxFlexGridSizer(5, 1, 2, 2);
+    wxFlexGridSizer* down_grid_sizer = new wxFlexGridSizer(4, 2, 5, 3);
+    wxFlexGridSizer* mid_buttons_grid_sizer = new wxFlexGridSizer(3, 2, 5, 3);
+    wxFlexGridSizer* grid_sizer_1 = new wxFlexGridSizer(1, 3, 2, 2);
+    grid_sizer_1->Add(apply_button, 0, wxTOP, 4);
+    grid_sizer_1->Add(configure_button, 0, wxTOP, 4);
+    grid_sizer_1->Add(cancel_button, 0, wxTOP, 4);
+    main_grid_sizer->Add(grid_sizer_1, 1, wxLEFT|wxEXPAND, 2);
+    main_grid_sizer->Add(top_static_line, 0, wxTOP|wxBOTTOM|wxEXPAND, 4);
+    mid_buttons_grid_sizer->Add(init_md_button, 0, 0, 0);
+    mid_buttons_grid_sizer->Add(init_md_combo_box, 0, 0, 0);
+    mid_buttons_grid_sizer->Add(three_opt_button, 0, 0, 0);
+    mid_buttons_grid_sizer->Add(three_opt_combo_box, 0, 0, 0);
+    mid_buttons_grid_sizer->Add(subg_button, 0, 0, 0);
+    mid_buttons_grid_sizer->Add(subg_combo_box, 0, 0, 0);
+    main_grid_sizer->Add(mid_buttons_grid_sizer, 1, wxALL|wxEXPAND, 2);
+    main_grid_sizer->Add(mid_static_line, 0, wxTOP|wxBOTTOM|wxEXPAND, 5);
+    down_grid_sizer->Add(init_mp_button, 0, 0, 0);
+    down_grid_sizer->Add(init_mp_combo_box, 0, 0, 0);
+    down_grid_sizer->Add(ls_button, 0, 0, 0);
+    down_grid_sizer->Add(ls_combo_box, 0, 0, 0);
+    down_grid_sizer->Add(pert_button, 0, 0, 0);
+    down_grid_sizer->Add(pert_combo_box, 0, 0, 0);
+    down_grid_sizer->Add(cons_button, 0, wxBOTTOM, 5);
+    down_grid_sizer->Add(cons_combo_box, 0, wxBOTTOM, 7);
+    main_grid_sizer->Add(down_grid_sizer, 1, wxALL|wxEXPAND, 2);
+    SetSizer(main_grid_sizer);
+    main_grid_sizer->Fit(this);
+    Layout();
+}
+
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void InitMemories::onTimerMDEvent(wxCommandEvent &event)
 {
     three_opt_button->Enable();
@@ -129,7 +200,7 @@ void InitMemories::onApplyClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void InitMemories::onConfigureClick(wxCommandEvent &event)
 {
-    AteamParam *ateam_param = new AteamParam(this, wxID_ANY, wxEmptyString, wxPoint(400, 100));
+    AteamParam *ateam_param = new AteamParam(this, wxID_ANY, wxEmptyString, wxPoint(420, 200));
     ateam_param->Show();
 }
 
@@ -233,73 +304,3 @@ void InitMemories::onConsClick(wxCommandEvent &event)
 {
 }
 
-/* ------------------------------------------------------------------------------------- */
-/*                                                                                       */
-/* PARAMETROS:                                                                           */
-/* ------------------------------------------------------------------------------------- */
-void InitMemories::set_properties()
-{
-    SetTitle(_("InitMemories"));
-    int init_memories_statusbar_widths[] = { -1 };
-    init_memories_statusbar->SetStatusWidths(1, init_memories_statusbar_widths);
-    const wxString init_memories_statusbar_fields[] = {
-        _("")
-    };
-    for(int i = 0; i < init_memories_statusbar->GetFieldsCount(); ++i) {
-        init_memories_statusbar->SetStatusText(init_memories_statusbar_fields[i], i);
-    }
-    apply_button->SetMinSize(wxSize(90, 27));
-    configure_button->SetMinSize(wxSize(90, 27));
-    cancel_button->SetMinSize(wxSize(90, 27));
-    init_md_button->SetMinSize(wxSize(90, 27));
-    init_md_combo_box->SetMinSize(wxSize(181, 27));
-    three_opt_button->SetMinSize(wxSize(90, 27));
-    three_opt_combo_box->SetMinSize(wxSize(181, 27));
-    subg_button->SetMinSize(wxSize(90, 27));
-    subg_combo_box->SetMinSize(wxSize(181, 27));
-    init_mp_button->SetMinSize(wxSize(90, 27));
-    init_mp_combo_box->SetMinSize(wxSize(181, 27));
-    ls_button->SetMinSize(wxSize(90, 27));
-    ls_combo_box->SetMinSize(wxSize(181, 27));
-    pert_button->SetMinSize(wxSize(90, 27));
-    pert_combo_box->SetMinSize(wxSize(181, 27));
-    cons_button->SetMinSize(wxSize(90, 27));
-    cons_combo_box->SetMinSize(wxSize(181, 27));
-}
-
-/* ------------------------------------------------------------------------------------- */
-/*                                                                                       */
-/* PARAMETROS:                                                                           */
-/* ------------------------------------------------------------------------------------- */
-void InitMemories::do_layout()
-{
-    wxFlexGridSizer* main_grid_sizer = new wxFlexGridSizer(5, 1, 2, 2);
-    wxFlexGridSizer* down_grid_sizer = new wxFlexGridSizer(4, 2, 5, 3);
-    wxFlexGridSizer* mid_buttons_grid_sizer = new wxFlexGridSizer(3, 2, 5, 3);
-    wxFlexGridSizer* grid_sizer_1 = new wxFlexGridSizer(1, 3, 2, 2);
-    grid_sizer_1->Add(apply_button, 0, wxTOP, 4);
-    grid_sizer_1->Add(configure_button, 0, wxTOP, 4);
-    grid_sizer_1->Add(cancel_button, 0, wxTOP, 4);
-    main_grid_sizer->Add(grid_sizer_1, 1, wxLEFT|wxEXPAND, 2);
-    main_grid_sizer->Add(top_static_line, 0, wxALL|wxEXPAND, 2);
-    mid_buttons_grid_sizer->Add(init_md_button, 0, 0, 0);
-    mid_buttons_grid_sizer->Add(init_md_combo_box, 0, 0, 0);
-    mid_buttons_grid_sizer->Add(three_opt_button, 0, 0, 0);
-    mid_buttons_grid_sizer->Add(three_opt_combo_box, 0, 0, 0);
-    mid_buttons_grid_sizer->Add(subg_button, 0, 0, 0);
-    mid_buttons_grid_sizer->Add(subg_combo_box, 0, 0, 0);
-    main_grid_sizer->Add(mid_buttons_grid_sizer, 1, wxALL|wxEXPAND, 2);
-    main_grid_sizer->Add(mid_static_line, 0, wxALL|wxEXPAND, 2);
-    down_grid_sizer->Add(init_mp_button, 0, 0, 0);
-    down_grid_sizer->Add(init_mp_combo_box, 0, 0, 0);
-    down_grid_sizer->Add(ls_button, 0, 0, 0);
-    down_grid_sizer->Add(ls_combo_box, 0, 0, 0);
-    down_grid_sizer->Add(pert_button, 0, 0, 0);
-    down_grid_sizer->Add(pert_combo_box, 0, 0, 0);
-    down_grid_sizer->Add(cons_button, 0, wxBOTTOM, 4);
-    down_grid_sizer->Add(cons_combo_box, 0, wxBOTTOM, 4);
-    main_grid_sizer->Add(down_grid_sizer, 1, wxALL|wxEXPAND, 2);
-    SetSizer(main_grid_sizer);
-    main_grid_sizer->Fit(this);
-    Layout();
-}

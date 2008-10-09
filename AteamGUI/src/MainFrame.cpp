@@ -16,7 +16,9 @@
 /* ------------------------------------------------------------------------------------- */
 
 #include "MainFrame.h"
+#include "Graph.h"
 #include "IOParam.h"
+
 #include "../include/InitMemories.h"
 #include "../include/AteamParam.h"
 
@@ -28,6 +30,8 @@ extern "C" {
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
+
+Graph *frame = (Graph *) NULL;
 
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
@@ -51,7 +55,7 @@ MainFrame::MainFrame(
     edit_button = new wxButton(this, 16, _("Edit"));
 
     stop_button->Disable();
-    plot_button->Disable();
+    //plot_button->Disable();
     add_button->Disable();
     remove_button->Disable();
     edit_button->Disable();
@@ -70,6 +74,8 @@ MainFrame::MainFrame(
 
     set_properties();
     do_layout();
+
+
 
 }
 
@@ -94,7 +100,7 @@ void MainFrame::set_properties()
     add_button->SetMinSize(wxSize(95, 27));
     remove_button->SetMinSize(wxSize(95, 27));
     edit_button->SetMinSize(wxSize(95, 27));
-    team_tree_ctrl->SetMinSize(wxSize(291, 500));
+    team_tree_ctrl->SetMinSize(wxSize(291, 625));
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -125,7 +131,7 @@ void MainFrame::do_layout()
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::onStartClick(wxCommandEvent &event)
 {
-    InitMemories *init_memories = new InitMemories(this, wxID_ANY, wxEmptyString, wxPoint(100, 250));
+    InitMemories *init_memories = new InitMemories(this, wxID_ANY, wxEmptyString, wxPoint(100, 200));
     init_memories->Show();
 
     //initMD();
@@ -173,6 +179,15 @@ void MainFrame::onStopClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::onPlotClick(wxCommandEvent &event)
 {
+    if (frame == NULL)
+    {
+        frame = new Graph(this, -1, _T("wxPlot Demo"), wxPoint(400, 80), wxSize(800, 400));
+        frame->Show(true);
+    }
+    else
+    {
+        frame->Show(true);
+    }
 }
 
 /* ------------------------------------------------------------------------------------- */
