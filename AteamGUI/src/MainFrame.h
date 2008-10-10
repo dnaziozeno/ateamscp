@@ -43,6 +43,7 @@ public:
     );
 
     void onApplyClick();
+    void onAddAgent(int type, wxString ip, int mpi_ref);
 
     void initMD();
     void ExecAgInitMD(MPI_Comm communicator);

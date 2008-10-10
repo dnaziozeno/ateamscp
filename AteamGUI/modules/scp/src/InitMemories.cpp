@@ -3,6 +3,12 @@
 #include "../../../include/MainFrame.h"
 #include "../../../include/IOParam.h"
 
+#define THREE_OPT 1
+#define SUBG 2
+#define LS 3
+#define PERT 4
+#define CONS 5
+
 extern "C" {
     #include "../../../../AteamMPI/initMD.c"
 }
@@ -251,8 +257,10 @@ void InitMemories::onInitMDClick(wxCommandEvent &event)
     strcpy(argvInitMD[3], IOParam::getExecutablePath());
     strcat(argvInitMD[3], "/../AteamMPI/teste");
 
-    int com = InitMD(4, argvInitMD);
-    MPI_Comm com1 = (MPI_Comm) com;
+    //int com = InitMD(4, argvInitMD);
+    //MPI_Comm com1 = (MPI_Comm) com;
+
+    timerMD->Start(100, false);
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -261,6 +269,8 @@ void InitMemories::onInitMDClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void InitMemories::onThreeOPTClick(wxCommandEvent &event)
 {
+    MainFrame *main_frame = (MainFrame *) this->GetParent();
+    main_frame->onAddAgent(THREE_OPT, three_opt_combo_box->GetValue(), 1);
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -269,6 +279,8 @@ void InitMemories::onThreeOPTClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void InitMemories::onSubGClick(wxCommandEvent &event)
 {
+    MainFrame *main_frame = (MainFrame *) this->GetParent();
+    main_frame->onAddAgent(SUBG, three_opt_combo_box->GetValue(), 1);
 }
 
 /* ------------------------------------------------------------------------------------- */
