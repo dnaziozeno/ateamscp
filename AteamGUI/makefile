@@ -42,7 +42,7 @@ project-main: ./obj/MainFrame.o ./obj/IOParam.o ./obj/Graph.o ./obj/AteamScp.o
 	
 	
 ./bin/ateam-scp: ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/Graph.o ./obj/AteamScp.o
-	$(CC) $(CFLAGS) ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/Graph.o ./obj/AteamScp.o ../AteamMPI/grdual.o ../AteamMPI/agentrot.o ../AteamMPI/readsc.o ../AteamMPI/readparam.o ../AteamMPI/reduction.o $(WXLIBS) $(WXPLOTLIB) -o ./bin/ateam-scp 
+	$(CC) $(CFLAGS) ./modules/$(module)/obj/AteamParam.o ./modules/$(module)/obj/InitMemories.o ./obj/MainFrame.o ./obj/IOParam.o ./obj/Graph.o ./obj/AteamScp.o ../AteamMPI/grdual.o ../AteamMPI/agentrot.o ../AteamMPI/readsc.o ../AteamMPI/readparam.o ../AteamMPI/reduction.o $(WXLIBS) $(WXPLOTLIB) -o ./bin/ateam-scp -lwxchart
 	
 ./obj/Graph.o: ./src/Graph.cpp ./src/Graph.h
 	$(CC) $(CFLAGS) ./src/Graph.cpp $(WXFLAGS) -c -o ./obj/Graph.o

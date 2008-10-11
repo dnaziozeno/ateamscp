@@ -1,3 +1,20 @@
+/* ------------------------------------------------------------------------------------- */
+/* Projeto Final de Curso, Universidade Federal de Goias, Instituto de Informatica       */
+/* Titulo: Console Grafico para Controle de um A-Team Dinamico                           */
+/*                                                                                       */
+/* Orientador: Humberto Jose Longo                                                       */
+/* Orientando: Diocleciano Pereira Naziozeno Neto                                        */
+/*                                                                                       */
+/* Homepage: http://www.inf.ufg.br/~diocleciano                                          */
+/* E-mail: dioclecianoneto@hotmail.com                                                   */
+/*                                                                                       */
+/* Alteracoes: 0 -> (10/09/94)                                                           */
+/* ------------------------------------------------------------------------------------- */
+
+/* ------------------------------------------------------------------------------------- */
+/* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
+/* ------------------------------------------------------------------------------------- */
+
 #include "InitMemories.h"
 #include "AteamParam.h"
 #include "../../../include/MainFrame.h"
@@ -13,6 +30,10 @@ extern "C" {
     #include "../../../../AteamMPI/initMD.c"
 }
 
+/* ------------------------------------------------------------------------------------- */
+/* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
+/* ------------------------------------------------------------------------------------- */
+
 wxTimer *timerMP, *timerMD;
 
 /* ------------------------------------------------------------------------------------- */
@@ -26,29 +47,58 @@ InitMemories::InitMemories(wxWindow* parent, int id, const wxString& title, cons
     apply_button = new wxButton(this, 120, _("Apply"));
     configure_button = new wxButton(this, 121, _("Configure"));
     cancel_button = new wxButton(this, 122, _("Cancel"));
+
     top_static_line = new wxStaticLine(this, wxID_ANY);
     init_md_button = new wxButton(this, 123, _("Init MD"));
     const wxString *init_md_combo_box_choices = NULL;
-    init_md_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, init_md_combo_box_choices, wxCB_DROPDOWN);
+    init_md_combo_box = new wxComboBox(
+        this, wxID_ANY, wxT("127.0.0.1"), wxDefaultPosition, wxDefaultSize,
+        0, init_md_combo_box_choices, wxCB_DROPDOWN
+    );
+
     three_opt_button = new wxButton(this, 124, _("Add 3OPT"));
     const wxString *three_opt_combo_box_choices = NULL;
-    three_opt_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, three_opt_combo_box_choices, wxCB_DROPDOWN);
+    three_opt_combo_box = new wxComboBox(
+        this, wxID_ANY, wxT("127.0.0.1"), wxDefaultPosition, wxDefaultSize,
+        0, three_opt_combo_box_choices, wxCB_DROPDOWN
+    );
+
     subg_button = new wxButton(this, 125, _("Add SUBG"));
     const wxString *subg_combo_box_choices = NULL;
-    subg_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, subg_combo_box_choices, wxCB_DROPDOWN);
+    subg_combo_box = new wxComboBox(
+        this, wxID_ANY, wxT("127.0.0.1"), wxDefaultPosition, wxDefaultSize,
+        0, subg_combo_box_choices, wxCB_DROPDOWN
+    );
+
     mid_static_line = new wxStaticLine(this, wxID_ANY);
+
     init_mp_button = new wxButton(this, 126, _("Init MP"));
     const wxString *init_mp_combo_box_choices = NULL;
-    init_mp_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, init_mp_combo_box_choices, wxCB_DROPDOWN);
+    init_mp_combo_box = new wxComboBox(
+        this, wxID_ANY, wxT("127.0.0.1"), wxDefaultPosition, wxDefaultSize,
+        0, init_mp_combo_box_choices, wxCB_DROPDOWN
+    );
+
     ls_button = new wxButton(this, 127, _("Add LS"));
     const wxString *ls_combo_box_choices = NULL;
-    ls_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, ls_combo_box_choices, wxCB_DROPDOWN);
+    ls_combo_box = new wxComboBox(
+        this, wxID_ANY, wxT("127.0.0.1"), wxDefaultPosition, wxDefaultSize,
+        0, ls_combo_box_choices, wxCB_DROPDOWN
+    );
+
     pert_button = new wxButton(this, 128, _("Add PERT"));
     const wxString *pert_combo_box_choices = NULL;
-    pert_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, pert_combo_box_choices, wxCB_DROPDOWN);
+    pert_combo_box = new wxComboBox(
+        this, wxID_ANY, wxT("127.0.0.1"), wxDefaultPosition, wxDefaultSize,
+        0, pert_combo_box_choices, wxCB_DROPDOWN
+    );
+
     cons_button = new wxButton(this, 129, _("Add CONS"));
     const wxString *cons_combo_box_choices = NULL;
-    cons_combo_box = new wxComboBox(this, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0, cons_combo_box_choices, wxCB_DROPDOWN);
+    cons_combo_box = new wxComboBox(
+        this, wxID_ANY, wxT("127.0.0.1"), wxDefaultPosition, wxDefaultSize,
+        0, cons_combo_box_choices, wxCB_DROPDOWN
+    );
 
     set_properties();
     do_layout();
@@ -127,19 +177,24 @@ void InitMemories::do_layout()
     wxFlexGridSizer* down_grid_sizer = new wxFlexGridSizer(4, 2, 5, 3);
     wxFlexGridSizer* mid_buttons_grid_sizer = new wxFlexGridSizer(3, 2, 5, 3);
     wxFlexGridSizer* grid_sizer_1 = new wxFlexGridSizer(1, 3, 2, 2);
+
     grid_sizer_1->Add(apply_button, 0, wxTOP, 4);
     grid_sizer_1->Add(configure_button, 0, wxTOP, 4);
     grid_sizer_1->Add(cancel_button, 0, wxTOP, 4);
+
     main_grid_sizer->Add(grid_sizer_1, 1, wxLEFT|wxEXPAND, 2);
     main_grid_sizer->Add(top_static_line, 0, wxTOP|wxBOTTOM|wxEXPAND, 4);
+
     mid_buttons_grid_sizer->Add(init_md_button, 0, 0, 0);
     mid_buttons_grid_sizer->Add(init_md_combo_box, 0, 0, 0);
     mid_buttons_grid_sizer->Add(three_opt_button, 0, 0, 0);
     mid_buttons_grid_sizer->Add(three_opt_combo_box, 0, 0, 0);
     mid_buttons_grid_sizer->Add(subg_button, 0, 0, 0);
     mid_buttons_grid_sizer->Add(subg_combo_box, 0, 0, 0);
+
     main_grid_sizer->Add(mid_buttons_grid_sizer, 1, wxALL|wxEXPAND, 2);
     main_grid_sizer->Add(mid_static_line, 0, wxTOP|wxBOTTOM|wxEXPAND, 5);
+
     down_grid_sizer->Add(init_mp_button, 0, 0, 0);
     down_grid_sizer->Add(init_mp_combo_box, 0, 0, 0);
     down_grid_sizer->Add(ls_button, 0, 0, 0);
@@ -148,7 +203,9 @@ void InitMemories::do_layout()
     down_grid_sizer->Add(pert_combo_box, 0, 0, 0);
     down_grid_sizer->Add(cons_button, 0, wxBOTTOM, 5);
     down_grid_sizer->Add(cons_combo_box, 0, wxBOTTOM, 7);
+
     main_grid_sizer->Add(down_grid_sizer, 1, wxALL|wxEXPAND, 2);
+
     SetSizer(main_grid_sizer);
     main_grid_sizer->Fit(this);
     Layout();
@@ -233,7 +290,7 @@ void InitMemories::onInitMDClick(wxCommandEvent &event)
     );
     */
 
-    //MainFrame *main_frame = (MainFrame *) this->GetParent();
+    MainFrame *main_frame = (MainFrame *) this->GetParent();
     //main_frame->onMemoriesInitMDClick();
 
     //timerMD->Start(100, false);
@@ -260,7 +317,15 @@ void InitMemories::onInitMDClick(wxCommandEvent &event)
     //int com = InitMD(4, argvInitMD);
     //MPI_Comm com1 = (MPI_Comm) com;
 
-    timerMD->Start(100, false);
+    //timerMD->Start(100, false);
+
+    three_opt_button->Enable();
+    three_opt_combo_box->Enable();
+
+    init_md_button->Disable();
+    init_md_combo_box->Disable();
+
+    main_frame->onApplyClick();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -280,7 +345,7 @@ void InitMemories::onThreeOPTClick(wxCommandEvent &event)
 void InitMemories::onSubGClick(wxCommandEvent &event)
 {
     MainFrame *main_frame = (MainFrame *) this->GetParent();
-    main_frame->onAddAgent(SUBG, three_opt_combo_box->GetValue(), 1);
+    main_frame->onAddAgent(SUBG, subg_combo_box->GetValue(), 1);
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -289,7 +354,22 @@ void InitMemories::onSubGClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void InitMemories::onInitMPClick(wxCommandEvent &event)
 {
-    timerMP->Start(100, false);
+    //timerMP->Start(100, false);
+
+    subg_button->Enable();
+    subg_combo_box->Enable();
+
+    ls_button->Enable();
+    ls_combo_box->Enable();
+    pert_button->Enable();
+    pert_combo_box->Enable();
+    cons_button->Enable();
+    cons_combo_box->Enable();
+
+    init_mp_button->Disable();
+    init_mp_combo_box->Disable();
+
+    //MainFrame::onApplyClick();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -298,6 +378,8 @@ void InitMemories::onInitMPClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void InitMemories::onLSClick(wxCommandEvent &event)
 {
+    MainFrame *main_frame = (MainFrame *) this->GetParent();
+    main_frame->onAddAgent(LS, ls_combo_box->GetValue(), 1);
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -306,6 +388,8 @@ void InitMemories::onLSClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void InitMemories::onPertClick(wxCommandEvent &event)
 {
+    MainFrame *main_frame = (MainFrame *) this->GetParent();
+    main_frame->onAddAgent(PERT, pert_combo_box->GetValue(), 1);
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -314,5 +398,10 @@ void InitMemories::onPertClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void InitMemories::onConsClick(wxCommandEvent &event)
 {
+    MainFrame *main_frame = (MainFrame *) this->GetParent();
+    main_frame->onAddAgent(CONS, cons_combo_box->GetValue(), 1);
 }
 
+/* ------------------------------------------------------------------------------------- */
+/* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
+/* ------------------------------------------------------------------------------------- */

@@ -22,6 +22,17 @@
 #include "../include/InitMemories.h"
 #include "../include/AteamParam.h"
 
+#include <wx/points.h>
+#include <wx/barchartpoints.h>
+#include <wx/bar3dchartpoints.h>
+#include <wx/chartctrl.h>
+#include <wx/chartcolors.h>
+#include <wx/piechartpoints.h>
+#include <wx/pie3dchartpoints.h>
+#include <wx/chart.h>
+
+#include <wx/datetime.h>
+
 #define THREE_OPT 1
 #define SUBG 2
 #define LS 3
@@ -40,7 +51,15 @@ extern "C" {
 Graph *frame = (Graph *) NULL;
 wxTreeItemId root_id;
 
+wxChartCtrl *chartLeft2;
+wxChartPoints *bcpLeft1;
+
+wxFlexGridSizer* main_grid_sizer;
+
+wxTextCtrl *status;
+
 int nagents[6];
+float pagents[6];
 
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
@@ -55,6 +74,7 @@ MainFrame::MainFrame(
    // MPI_Init(0, NULL);
 
     nagents[0] = nagents[1] = nagents[2] = nagents[3] = nagents[4] = nagents[5] = 0;
+    pagents[0] = pagents[1] = pagents[2] = pagents[3] = pagents[4] = pagents[5] = 0.0;
 
     main_frame_statusbar = CreateStatusBar(1, 0);
 
@@ -80,19 +100,18 @@ MainFrame::MainFrame(
 
     button_static_line = new wxStaticLine(this, wxID_ANY);
 
-    team_tree_ctrl = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTR_DEFAULT_STYLE);
+    team_tree_ctrl = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
     team_tree_ctrl->SetWindowStyle(wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
 
     set_properties();
     do_layout();
 
+    char str[100];
+    sprintf(str, " 3OPT: %.1f\%, SUBG: %.1f\%\n LS: %.1f\% PERT: %.1f\%, CONS: %.1f\%", pagents[1], pagents[2], pagents[3], pagents[4], pagents[5]);
+    status->SetValue(wxString::FromAscii(str));
 
-    root_id = team_tree_ctrl->AddRoot(_T("A-Team Set Covering Problem"), -1, -1, NULL);
-    //wxTreeItemId three_opt_id = team_tree_ctrl->AppendItem(root_id, _T("3OPT : 123 Agents, 30%"), -1, -1, NULL);
-    //wxTreeItemId subg_id = team_tree_ctrl->AppendItem(root_id, _T("SUBG : 123 Agents, 30%"), -1, -1, NULL);
-    //wxTreeItemId ls_id = team_tree_ctrl->AppendItem(root_id, _T("LS : 123 Agents, 30%"), -1, -1, NULL);
-    //wxTreeItemId pert_id = team_tree_ctrl->AppendItem(root_id, _T("PERT : 123 Agents, 30%"), -1, -1, NULL);
-    //wxTreeItemId cons_id = team_tree_ctrl->AppendItem(root_id, _T("CONS : 123 Agents, 30%"), -1, -1, NULL);
+    //root_id = team_tree_ctrl->AddRoot(_T("A-Team Set Covering Problem"), -1, -1, NULL);
+    root_id = team_tree_ctrl->AddRoot(_T("A-TEAM SET COVERING PROBLEM"), -1, -1, NULL);
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -116,7 +135,7 @@ void MainFrame::set_properties()
     add_button->SetMinSize(wxSize(95, 27));
     remove_button->SetMinSize(wxSize(95, 27));
     edit_button->SetMinSize(wxSize(95, 27));
-    team_tree_ctrl->SetMinSize(wxSize(291, 625));
+    team_tree_ctrl->SetMinSize(wxSize(291, 387));
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -125,7 +144,7 @@ void MainFrame::set_properties()
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::do_layout()
 {
-    wxFlexGridSizer* main_grid_sizer = new wxFlexGridSizer(3, 1, 0, 0);
+    main_grid_sizer = new wxFlexGridSizer(5, 1, 0, 0);
     wxFlexGridSizer* button_grid_sizer = new wxFlexGridSizer(2, 3, 4, 4);
     button_grid_sizer->Add(start_button, 0, 0, 0);
     button_grid_sizer->Add(stop_button, 0, 0, 0);
@@ -136,6 +155,32 @@ void MainFrame::do_layout()
     main_grid_sizer->Add(button_grid_sizer, 1, wxALL|wxEXPAND, 3);
     main_grid_sizer->Add(button_static_line, 0, wxALL|wxEXPAND, 4);
     main_grid_sizer->Add(team_tree_ctrl, 1, wxALL|wxEXPAND, 4);
+
+
+
+    /* ================================================================================= */
+
+    bcpLeft1 = wxBar3DChartPoints::CreateWxBar3DChartPoints(wxT("Porcentagem"), wxCHART_GRAY, true);
+
+    bcpLeft1->Add( wxT("3OPT"), 1, 0);
+    bcpLeft1->Add( wxT("SUBG"), 2, 0);
+    bcpLeft1->Add( wxT("LS"), 3, 0);
+    bcpLeft1->Add( wxT("PERT"), 4, 0);
+    bcpLeft1->Add( wxT("CONS"), 5, 0);
+
+    chartLeft2 = new wxChartCtrl( this, -1, (STYLE)(USE_AXIS_Y|USE_GRID), wxDefaultPosition, wxSize(200,180), wxSUNKEN_BORDER  );
+    chartLeft2->Add( bcpLeft1 );
+    
+    main_grid_sizer->Add(chartLeft2, 1, wxALL|wxEXPAND, 4);
+
+    status = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER|wxTE_MULTILINE);
+    status->SetMinSize(wxSize(200, 38));
+    status->SetEditable(false);
+
+    main_grid_sizer->Add(status, 1, wxALL|wxEXPAND, 4);
+
+    /* ================================================================================= */
+
     SetSizer(main_grid_sizer);
     main_grid_sizer->Fit(this);
     Layout();
@@ -259,12 +304,12 @@ void MainFrame::onApplyClick()
     team_tree_ctrl->AddRoot(_T("A-Team Set Covering Problem"), -1, -1, NULL);
 
     stop_button->Enable();
-    //plot_button->Enable();
-    //add_button->Enable();
-    //remove_button->Enable();
-    //edit_button->Enable();
+    plot_button->Enable();
+    add_button->Enable();
+    remove_button->Enable();
+    edit_button->Enable();
 
-    //start_button->Disable();
+    start_button->Disable();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -273,40 +318,71 @@ void MainFrame::onApplyClick()
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::onAddAgent(int type, wxString ip, int mpi_ref)
 {
+    wxDateTime now = wxDateTime::Now();
+    wxString hour = wxString::Format(wxT("%i"), wxDateTime::ConvertYearToBC(now.GetHour()));
+    wxString minute = wxString::Format(wxT("%i"), wxDateTime::ConvertYearToBC(now.GetMinute()));
+    wxString second = wxString::Format(wxT("%i"), wxDateTime::ConvertYearToBC(now.GetSecond()));
+    wxString time_stamp = hour + _(":") + minute + _(":") + second;
+
     switch (type)
     {
         case THREE_OPT:
-            team_tree_ctrl->AppendItem(root_id, _T("3OPT-") + ip, -1, -1, NULL);
+            team_tree_ctrl->AppendItem(root_id, _T("3OPT-") + ip + _("-") + time_stamp, -1, -1, NULL);
             nagents[THREE_OPT]++;
             nagents[0]++;
         break;
 
         case SUBG:
-            team_tree_ctrl->AppendItem(root_id, _T("SUBG-") + ip, -1, -1, NULL);
+            team_tree_ctrl->AppendItem(root_id, _T("SUBG-") + ip + _("-") + time_stamp, -1, -1, NULL);
             nagents[SUBG]++;
             nagents[0]++;
             break;
 
         case LS:
-            team_tree_ctrl->AppendItem(root_id, _T("LS-") + ip, -1, -1, NULL);
+            team_tree_ctrl->AppendItem(root_id, _T("LS-") + ip + _("-") + time_stamp, -1, -1, NULL);
             nagents[LS]++;
             nagents[0]++;
         break;
 
         case PERT:
-            team_tree_ctrl->AppendItem(root_id, _T("PERT-") + ip, -1, -1, NULL);
+            team_tree_ctrl->AppendItem(root_id, _T("PERT-") + ip + _("-") + time_stamp, -1, -1, NULL);
             nagents[PERT]++;
             nagents[0]++;
         break;
 
         case CONS:
-            team_tree_ctrl->AppendItem(root_id, _T("CONS-") + ip, -1, -1, NULL);
+            team_tree_ctrl->AppendItem(root_id, _T("CONS-") + ip + _("-") + time_stamp, -1, -1, NULL);
             nagents[CONS]++;
             nagents[0]++;
         break;
     }
 
-    printf("3OPT: %d-%d\%, SUBG: %d-%d\%, LS: %d, PERT: %d, CONS: %d\n", nagents[1], (int)(((float)nagents[1]/(float)nagents[0]) * 100), nagents[2],(int)(((float)nagents[2]/(float)nagents[0]) * 100), nagents[3], nagents[4], nagents[5]);
+    pagents[1] = ((float)nagents[1]/(float)nagents[0]) * 100;
+    pagents[2] = ((float)nagents[2]/(float)nagents[0]) * 100;
+    pagents[3] = ((float)nagents[3]/(float)nagents[0]) * 100;
+    pagents[4] = ((float)nagents[4]/(float)nagents[0]) * 100;
+    pagents[5] = ((float)nagents[5]/(float)nagents[0]) * 100;
+
+    bcpLeft1 = wxBar3DChartPoints::CreateWxBar3DChartPoints(wxT("Porcentagem"), wxCHART_GRAY, false );
+
+    bcpLeft1->Add( wxT("3OPT"), 1, pagents[1]);
+    bcpLeft1->Add( wxT("SUBG"), 2, pagents[2]);
+    bcpLeft1->Add( wxT("LS"), 3, pagents[3]);
+    bcpLeft1->Add( wxT("PERT"), 4, pagents[4]);
+    bcpLeft1->Add( wxT("CONS"), 5, pagents[5]);
+
+    bcpLeft1->SetDisplayTag( NAME );
+    chartLeft2 = new wxChartCtrl( this, -1, (STYLE)(USE_AXIS_Y|USE_GRID), wxDefaultPosition, wxSize(200,180), wxSUNKEN_BORDER  );
+    chartLeft2->Add( bcpLeft1 );
+
+    main_grid_sizer->Remove(3);
+    main_grid_sizer->Insert(3,chartLeft2, 1, wxALL|wxEXPAND, 4);
+    Layout();
+
+    char str[100];
+    sprintf(str, " 3OPT: %.1f\%, SUBG: %.1f\%\n LS: %.1f\% PERT: %.1f\%, CONS: %.1f\%", pagents[1], pagents[2], pagents[3], pagents[4], pagents[5]);
+    status->SetValue(wxString::FromAscii(str));
+
     team_tree_ctrl->SortChildren(root_id);
 }
 
