@@ -20,11 +20,27 @@
 
 #include <wx/wx.h>
 #include <wx/image.h>
-
 #include <wx/treectrl.h>
 #include <wx/statline.h>
 
+#include <wx/points.h>
+#include <wx/barchartpoints.h>
+#include <wx/bar3dchartpoints.h>
+#include <wx/chartctrl.h>
+#include <wx/chartcolors.h>
+#include <wx/piechartpoints.h>
+#include <wx/pie3dchartpoints.h>
+#include <wx/chart.h>
+
+#include <wx/datetime.h>
+
 #include <mpi.h>
+
+#define THREE_OPT 1
+#define SUBG 2
+#define LS 3
+#define PERT 4
+#define CONS 5
 
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
@@ -43,7 +59,8 @@ public:
     );
 
     void onApplyClick();
-    void onAddAgent(int type, wxString ip, int mpi_ref);
+    void onAddAgent(int type, wxString ip, int mpi_ref, int *params);
+    void onRemoveAgent(int type, int mpi_ref);
 
     void initMD();
     void ExecAgInitMD(MPI_Comm communicator);
@@ -59,6 +76,8 @@ private:
     void onRemoveClick(wxCommandEvent &event);
     void onEditClick(wxCommandEvent &event);
 
+    void refresh_statistics();
+
 protected:
     wxStatusBar *main_frame_statusbar;
 
@@ -73,4 +92,25 @@ protected:
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
 
+class MyTreeItemData: public wxTreeItemData {
+
+public:
+    MyTreeItemData(int type, int *params);
+    void GetId();
+    void SetId();
+    int GetType();
+    int *GetParams();
+
+private:
+
+protected:
+    int type_t;
+    int *params_t;
+};
+
+
+
 #endif /* MAINFRAME_H */
+
+
+

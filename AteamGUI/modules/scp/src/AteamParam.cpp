@@ -24,6 +24,7 @@
 /* ------------------------------------------------------------------------------------- */
 
 wxTimer *status_bar_timer;
+int **return_params_t;
 
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
@@ -553,11 +554,14 @@ void AteamParam::onResetClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void AteamParam::onApplyClick(wxCommandEvent &event)
 {
-    MainFrame *main_frame = (MainFrame *) this->GetParent();
-    main_frame->onApplyClick();
+    //MainFrame *main_frame = (MainFrame *) this->GetParent();
+    //main_frame->onApplyClick();
 
-    SetStatusText(_("BUTTON APPLY CLICKED..."), 0);
-    status_bar_timer->Start(STATUS_BAR_LIVE);
+    //SetStatusText(_("BUTTON APPLY CLICKED..."), 0);
+    //status_bar_timer->Start(STATUS_BAR_LIVE);
+
+    free(*return_params_t);
+    *return_params_t = interfaceToParams();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -682,11 +686,21 @@ int *AteamParam::interfaceToParams()
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
+void AteamParam::setReturnParams(int **return_params)
+{
+    return_params_t = return_params;
+}
+
+/* ------------------------------------------------------------------------------------- */
+/*                                                                                       */
+/* PARAMETROS:                                                                           */
+/* ------------------------------------------------------------------------------------- */
 void AteamParam::onCloseWindow(wxCommandEvent &event)
 {
-    printf("EXIT...\n");
-    status_bar_timer->Stop();
-    Destroy();
+    //printf("EXIT...\n");
+    //status_bar_timer->Stop();
+    //Destroy();
+    this->Hide();
 }
 
 /* ------------------------------------------------------------------------------------- */

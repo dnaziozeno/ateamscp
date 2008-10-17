@@ -37,6 +37,11 @@ public:
         const wxSize& size=wxDefaultSize, long style=wxDEFAULT_FRAME_STYLE
     );
 
+    void paramsToInterface(int *params);
+    int *interfaceToParams();
+
+    void setReturnParams(int **return_params);
+
 private:
     void set_properties();
     void do_layout();
@@ -49,9 +54,6 @@ private:
     void onTimerEvent(wxCommandEvent &event);
 
     int defaultParams();
-    void paramsToInterface(int *params);
-    int *interfaceToParams();
-
     void onCloseWindow(wxCommandEvent &event);
 
 protected:

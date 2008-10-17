@@ -35,6 +35,9 @@ extern "C" {
 /* ------------------------------------------------------------------------------------- */
 
 wxTimer *timerMP, *timerMD;
+AteamParam *ateam_param;
+
+bool start_team = false;
 
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
@@ -131,6 +134,8 @@ InitMemories::InitMemories(wxWindow* parent, int id, const wxString& title, cons
 
     Connect(990, wxEVT_TIMER, wxCommandEventHandler(InitMemories::onTimerMDEvent));
     Connect(991, wxEVT_TIMER, wxCommandEventHandler(InitMemories::onTimerMPEvent));
+
+    ateam_param = new AteamParam(this, wxID_ANY, wxEmptyString, wxPoint(420, 200));
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -263,7 +268,6 @@ void InitMemories::onApplyClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void InitMemories::onConfigureClick(wxCommandEvent &event)
 {
-    AteamParam *ateam_param = new AteamParam(this, wxID_ANY, wxEmptyString, wxPoint(420, 200));
     ateam_param->Show();
 }
 
@@ -325,7 +329,11 @@ void InitMemories::onInitMDClick(wxCommandEvent &event)
     init_md_button->Disable();
     init_md_combo_box->Disable();
 
-    main_frame->onApplyClick();
+    if (!start_team)
+    {
+        main_frame->onApplyClick();
+        start_team = true;
+    }
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -335,7 +343,7 @@ void InitMemories::onInitMDClick(wxCommandEvent &event)
 void InitMemories::onThreeOPTClick(wxCommandEvent &event)
 {
     MainFrame *main_frame = (MainFrame *) this->GetParent();
-    main_frame->onAddAgent(THREE_OPT, three_opt_combo_box->GetValue(), 1);
+    main_frame->onAddAgent(THREE_OPT, three_opt_combo_box->GetValue(), 1, ateam_param->interfaceToParams());
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -345,7 +353,7 @@ void InitMemories::onThreeOPTClick(wxCommandEvent &event)
 void InitMemories::onSubGClick(wxCommandEvent &event)
 {
     MainFrame *main_frame = (MainFrame *) this->GetParent();
-    main_frame->onAddAgent(SUBG, subg_combo_box->GetValue(), 1);
+    main_frame->onAddAgent(SUBG, subg_combo_box->GetValue(), 1, ateam_param->interfaceToParams());
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -369,7 +377,12 @@ void InitMemories::onInitMPClick(wxCommandEvent &event)
     init_mp_button->Disable();
     init_mp_combo_box->Disable();
 
-    //MainFrame::onApplyClick();
+    if (!start_team)
+    {
+        MainFrame *main_frame = (MainFrame *) this->GetParent();
+        main_frame->onApplyClick();
+        start_team = true;
+    }
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -379,7 +392,7 @@ void InitMemories::onInitMPClick(wxCommandEvent &event)
 void InitMemories::onLSClick(wxCommandEvent &event)
 {
     MainFrame *main_frame = (MainFrame *) this->GetParent();
-    main_frame->onAddAgent(LS, ls_combo_box->GetValue(), 1);
+    main_frame->onAddAgent(LS, ls_combo_box->GetValue(), 1, ateam_param->interfaceToParams());
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -389,7 +402,7 @@ void InitMemories::onLSClick(wxCommandEvent &event)
 void InitMemories::onPertClick(wxCommandEvent &event)
 {
     MainFrame *main_frame = (MainFrame *) this->GetParent();
-    main_frame->onAddAgent(PERT, pert_combo_box->GetValue(), 1);
+    main_frame->onAddAgent(PERT, pert_combo_box->GetValue(), 1, ateam_param->interfaceToParams());
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -399,7 +412,7 @@ void InitMemories::onPertClick(wxCommandEvent &event)
 void InitMemories::onConsClick(wxCommandEvent &event)
 {
     MainFrame *main_frame = (MainFrame *) this->GetParent();
-    main_frame->onAddAgent(CONS, cons_combo_box->GetValue(), 1);
+    main_frame->onAddAgent(CONS, cons_combo_box->GetValue(), 1, ateam_param->interfaceToParams());
 }
 
 /* ------------------------------------------------------------------------------------- */
