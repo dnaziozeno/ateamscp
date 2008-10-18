@@ -16,15 +16,14 @@
 /* ------------------------------------------------------------------------------------- */
 
 #include "AteamParam.h"
-#include "../../../include/IOParam.h"
-#include "../../../include/MainFrame.h"
+
 
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
 
 wxTimer *status_bar_timer;
-int **return_params_t;
+MyTreeItemData *edit_data_t;
 
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
@@ -42,7 +41,7 @@ AteamParam::AteamParam(
     save_button = new wxButton(this, 112, _("Save"));
     reset_button = new wxButton(this, 113, _("Reset"));
     apply_button = new wxButton(this, 114, _("Apply"));
-    hide_button = new wxButton(this, 115, _("Hide"));
+    //hide_button = new wxButton(this, 115, _("Hide"));
 
     Connect(111, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onOpenClick));
     Connect(112, wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(AteamParam::onSaveClick));
@@ -193,11 +192,11 @@ void AteamParam::set_properties()
         ateam_param_statusbar->SetStatusText(ateam_param_statusbar_fields[i], i);
     }
 
-    open_button->SetMinSize(wxSize(88, 27));
-    save_button->SetMinSize(wxSize(88, 27));
-    reset_button->SetMinSize(wxSize(88, 27));
-    apply_button->SetMinSize(wxSize(88, 27));
-    hide_button->SetMinSize(wxSize(88, 27));
+    open_button->SetMinSize(wxSize(111, 27));
+    save_button->SetMinSize(wxSize(111, 27));
+    reset_button->SetMinSize(wxSize(111, 27));
+    apply_button->SetMinSize(wxSize(111, 27));
+    //hide_button->SetMinSize(wxSize(88, 27));
 
     dual_worst_checkbox->SetMinSize(wxSize(125, 22));
     dual_worst_checkbox->SetToolTip(_("(T/F) aceita (ou nao) sol. pior que a pior da mem."));
@@ -325,13 +324,14 @@ void AteamParam::do_layout()
     wxFlexGridSizer* check_grid_sizer_03 = new wxFlexGridSizer(3, 1, 0, 0);
     wxFlexGridSizer* check_grid_sizer_02 = new wxFlexGridSizer(3, 1, 0, 0);
     wxFlexGridSizer* check_grid_sizer_01 = new wxFlexGridSizer(3, 1, 0, 0);
-    wxFlexGridSizer* button_grid_sizer = new wxFlexGridSizer(1, 5, 4, 4);
+    //wxFlexGridSizer* button_grid_sizer = new wxFlexGridSizer(1, 5, 4, 4);
+    wxFlexGridSizer* button_grid_sizer = new wxFlexGridSizer(1, 4, 4, 4);
 
     button_grid_sizer->Add(open_button, 0, 0, 0);
     button_grid_sizer->Add(save_button, 0, 0, 0);
     button_grid_sizer->Add(reset_button, 0, 0, 0);
     button_grid_sizer->Add(apply_button, 0, 0, 0);
-    button_grid_sizer->Add(hide_button, 0, 0, 0);
+    //button_grid_sizer->Add(hide_button, 0, 0, 0);
 
     main_grid_sizer->Add(button_grid_sizer, 1, wxALL|wxEXPAND, 4);
     main_grid_sizer->Add(button_static_line_01, 0, wxLEFT|wxRIGHT|wxBOTTOM|wxEXPAND, 4);
@@ -560,8 +560,10 @@ void AteamParam::onApplyClick(wxCommandEvent &event)
     //SetStatusText(_("BUTTON APPLY CLICKED..."), 0);
     //status_bar_timer->Start(STATUS_BAR_LIVE);
 
-    free(*return_params_t);
-    *return_params_t = interfaceToParams();
+    edit_data_t->SetParams(interfaceToParams());
+
+    //free(*return_params_t);
+    //*return_params_t = interfaceToParams();
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -686,9 +688,10 @@ int *AteamParam::interfaceToParams()
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void AteamParam::setReturnParams(int **return_params)
+void AteamParam::editParams(MyTreeItemData *data)
 {
-    return_params_t = return_params;
+    edit_data_t = data;
+    paramsToInterface(edit_data_t->GetParams());
 }
 
 /* ------------------------------------------------------------------------------------- */

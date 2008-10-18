@@ -77,6 +77,7 @@ private:
     void onEditClick(wxCommandEvent &event);
 
     void refresh_statistics();
+    wxString getTime();
 
 protected:
     wxStatusBar *main_frame_statusbar;
@@ -99,6 +100,7 @@ public:
     void GetId();
     void SetId();
     int GetType();
+    void SetParams(int *params);
     int *GetParams();
 
 private:

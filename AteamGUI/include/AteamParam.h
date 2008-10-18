@@ -40,7 +40,7 @@ public:
     void paramsToInterface(int *params);
     int *interfaceToParams();
 
-    void setReturnParams(int **return_params);
+    void editParams(MyTreeItemData *data);
 
 private:
     void set_properties();

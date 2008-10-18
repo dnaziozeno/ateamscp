@@ -33,12 +33,12 @@
 Graph *frame = (Graph *) NULL;
 wxTreeItemId root_id;
 
+wxTreeItemId agents_tree_id[6];
+
 wxChartCtrl *statistics_chart;
 wxChartPoints *statistics_3D_bar;
 
 wxFlexGridSizer* main_grid_sizer;
-
-wxTextCtrl *status;
 
 AteamParam *ateam_param_main_frame;
 
@@ -103,15 +103,14 @@ void MainFrame::set_properties()
     for(int i = 0; i < main_frame_statusbar->GetFieldsCount(); ++i) {
         main_frame_statusbar->SetStatusText(main_frame_statusbar_fields[i], i);
     }
-    start_button->SetMinSize(wxSize(95, 27));
-    stop_button->SetMinSize(wxSize(95, 27));
-    plot_button->SetMinSize(wxSize(95, 27));
-    add_button->SetMinSize(wxSize(95, 27));
-    remove_button->SetMinSize(wxSize(95, 27));
-    edit_button->SetMinSize(wxSize(95, 27));
-    //team_tree_ctrl->SetMinSize(wxSize(291, 337));
-    team_tree_ctrl->SetMinSize(wxSize(345, 337));
-    
+    start_button->SetMinSize(wxSize(105, 27));
+    stop_button->SetMinSize(wxSize(105, 27));
+    plot_button->SetMinSize(wxSize(105, 27));
+    add_button->SetMinSize(wxSize(105, 27));
+    remove_button->SetMinSize(wxSize(105, 27));
+    edit_button->SetMinSize(wxSize(105, 27));
+    team_tree_ctrl->SetMinSize(wxSize(291, 383));
+
     stop_button->Disable();
     plot_button->Disable();
     add_button->Disable();
@@ -136,23 +135,6 @@ statistics_3D_bar->Add( wxT("CONS"), 9, 0);
     );
 
     statistics_chart->Add(statistics_3D_bar);
-
-    status = new wxTextCtrl(
-        this, wxID_ANY, wxEmptyString, wxDefaultPosition,
-        wxDefaultSize, wxTE_PROCESS_ENTER|wxTE_MULTILINE
-    );
-
-    status->SetMinSize(wxSize(200, 38));
-    status->SetEditable(false);
-
-    char status_text[128];
-
-    sprintf(
-        status_text, " 3OPT: %.1f\%, SUBG: %.1f\%\n LS: %.1f\% PERT: %.1f\%, CONS: %.1f\%",
-        pagents[1], pagents[2], pagents[3], pagents[4], pagents[5]
-    );
-
-    status->SetValue(wxString::FromAscii(status_text));
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -161,7 +143,7 @@ statistics_3D_bar->Add( wxT("CONS"), 9, 0);
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::do_layout()
 {
-    main_grid_sizer = new wxFlexGridSizer(5, 1, 0, 0);
+    main_grid_sizer = new wxFlexGridSizer(4, 1, 0, 0);
     wxFlexGridSizer* button_grid_sizer = new wxFlexGridSizer(2, 3, 4, 4);
 
     button_grid_sizer->Add(start_button, 0, 0, 0);
@@ -175,7 +157,6 @@ void MainFrame::do_layout()
     main_grid_sizer->Add(button_static_line, 0, wxALL|wxEXPAND, 4);
     main_grid_sizer->Add(team_tree_ctrl, 1, wxALL|wxEXPAND, 4);
     main_grid_sizer->Add(statistics_chart, 1, wxALL|wxEXPAND, 4);
-    main_grid_sizer->Add(status, 1, wxALL|wxEXPAND, 4);
 
     SetSizer(main_grid_sizer);
     main_grid_sizer->Fit(this);
@@ -241,12 +222,12 @@ void MainFrame::onPlotClick(wxCommandEvent &event)
 {
     if (frame == NULL)
     {
-        frame = new Graph(this, -1, _T("wxPlot Demo"), wxPoint(400, 80), wxSize(800, 400));
-        frame->Show(true);
+        //frame = new Graph(this, -1, _T("wxPlot"), wxPoint(420, 80), wxSize(800, 400));
+        //frame->Show(true);
     }
     else
     {
-        frame->Show(true);
+        //frame->Show(true);
     }
 }
 
@@ -267,7 +248,9 @@ void MainFrame::onRemoveClick(wxCommandEvent &event)
 {
     wxTreeItemId agent_id = team_tree_ctrl->GetSelection();
 
-    if (agent_id != root_id)
+    if (agent_id != root_id && agent_id != agents_tree_id[THREE_OPT] && 
+        agent_id != agents_tree_id[SUBG] && agent_id != agents_tree_id[LS] &&
+        agent_id != agents_tree_id[PERT] && agent_id != agents_tree_id[CONS])
     {
         MyTreeItemData *agent_data = (MyTreeItemData *) team_tree_ctrl->GetItemData(agent_id);
         onRemoveAgent(agent_data->GetType(), -1);
@@ -286,8 +269,7 @@ void MainFrame::onEditClick(wxCommandEvent &event)
     if (agent_id != root_id)
     {
         MyTreeItemData *data = (MyTreeItemData *) team_tree_ctrl->GetItemData(agent_id);
-        ateam_param_main_frame->paramsToInterface(data->GetParams());
-        //ateam_param_main_frame->setReturnParams(data);
+        ateam_param_main_frame->editParams(data);
         ateam_param_main_frame->Show();
     }
 }
@@ -298,7 +280,17 @@ void MainFrame::onEditClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::onApplyClick()
 {
-    root_id = team_tree_ctrl->AddRoot(_T("A-TEAM SET COVERING PROBLEM"), -1, -1, NULL);
+    root_id = team_tree_ctrl->AddRoot(_T("Set Covering Problem - ") + getTime(), -1, -1, NULL);
+    team_tree_ctrl->SetItemBold(root_id);
+
+    agents_tree_id[THREE_OPT] = team_tree_ctrl->AppendItem(root_id, _T("1-3OPT (0.00%)"), -1, -1, NULL);
+    agents_tree_id[SUBG] = team_tree_ctrl->AppendItem(root_id, _T("2-SUBG (0.00%)"), -1, -1, NULL);
+    agents_tree_id[LS] = team_tree_ctrl->AppendItem(root_id, _T("3-LS (0.00%)"), -1, -1, NULL);
+    agents_tree_id[PERT] = team_tree_ctrl->AppendItem(root_id, _T("4-PERT (0.00%)"), -1, -1, NULL);
+    agents_tree_id[CONS] = team_tree_ctrl->AppendItem(root_id, _T("5-CONS (0.00%)"), -1, -1, NULL);
+
+    team_tree_ctrl->ExpandAll();
+    team_tree_ctrl->SortChildren(root_id);
 
     stop_button->Enable();
     plot_button->Enable();
@@ -321,60 +313,31 @@ void MainFrame::onApplyClick()
 void MainFrame::onAddAgent(int type, wxString ip, int mpi_ref, int *params)
 {
     MyTreeItemData *data = new MyTreeItemData(type, params);
-    wxString str_hour, str_minute, str_second;
-    wxDateTime now = wxDateTime::Now();
-
-    int int_hour = now.GetHour();
-    int int_minute = now.GetMinute();
-    int int_second = now.GetSecond();
-
-    if (int_hour < 10)
-    {
-        if (int_hour > 0) str_hour = wxString::Format(wxT("0%i"), wxDateTime::ConvertYearToBC(int_hour));
-        else str_hour = wxString::Format(wxT("00"));
-    }
-    else str_hour = wxString::Format(wxT("%i"), wxDateTime::ConvertYearToBC(int_hour));
-
-    if (int_minute < 10)
-    {
-        if (int_minute > 0) str_minute = wxString::Format(wxT("0%i"), wxDateTime::ConvertYearToBC(int_minute));
-        else str_minute = wxString::Format(wxT("00"));
-    }
-    else str_minute = wxString::Format(wxT("%i"), wxDateTime::ConvertYearToBC(int_minute));
-
-    if (int_second < 10)
-    {
-        if (int_second > 0) str_second = wxString::Format(wxT("0%i"), wxDateTime::ConvertYearToBC(int_second));
-        else str_second = wxString::Format(wxT("00"));
-    }
-    else str_second = wxString::Format(wxT("%i"), wxDateTime::ConvertYearToBC(int_second));
-
-    wxString time_stamp = str_hour + _(":") + str_minute + _(":") + str_second;
 
     switch (type)
     {
         case THREE_OPT:
-            team_tree_ctrl->AppendItem(root_id, _T("3OPT-") + ip + _("-") + time_stamp, -1, -1, data);
+            team_tree_ctrl->AppendItem(agents_tree_id[THREE_OPT], ip + _("-") + getTime(), -1, -1, data);
             nagents[THREE_OPT]++;
         break;
 
         case SUBG:
-            team_tree_ctrl->AppendItem(root_id, _T("SUBG-") + ip + _("-") + time_stamp, -1, -1, data);
+            team_tree_ctrl->AppendItem(agents_tree_id[SUBG], ip + _("-") + getTime(), -1, -1, data);
             nagents[SUBG]++;
             break;
 
         case LS:
-            team_tree_ctrl->AppendItem(root_id, _T("LS-") + ip + _("-") + time_stamp, -1, -1, data);
+            team_tree_ctrl->AppendItem(agents_tree_id[LS], ip + _("-") + getTime(), -1, -1, data);
             nagents[LS]++;
         break;
 
         case PERT:
-            team_tree_ctrl->AppendItem(root_id, _T("PERT-") + ip + _("-") + time_stamp, -1, -1, data);
+            team_tree_ctrl->AppendItem(agents_tree_id[PERT], ip + _("-") + getTime(), -1, -1, data);
             nagents[PERT]++;
         break;
 
         case CONS:
-            team_tree_ctrl->AppendItem(root_id, _T("CONS-") + ip + _("-") + time_stamp, -1, -1, data);
+            team_tree_ctrl->AppendItem(agents_tree_id[CONS], ip + _("-") + getTime(), -1, -1, data);
             nagents[CONS]++;
         break;
     }
@@ -382,7 +345,6 @@ void MainFrame::onAddAgent(int type, wxString ip, int mpi_ref, int *params)
     nagents[0]++;
     refresh_statistics();
 
-    team_tree_ctrl->ExpandAll();
     team_tree_ctrl->SortChildren(root_id);
 }
 
@@ -469,15 +431,12 @@ statistics_3D_bar->Add( wxT("CONS"), 9, pagents[5]);
     main_grid_sizer->Insert(3,statistics_chart, 1, wxALL|wxEXPAND, 4);
     Layout();
 
-    /* Atualiza a legenda do gráfico com os novos dados estatisticos. */
-    char status_text[100];
-
-    sprintf(
-        status_text, " 3OPT: %.1f\%, SUBG: %.1f\%\n LS: %.1f\% PERT: %.1f\%, CONS: %.1f\%",
-        pagents[1], pagents[2], pagents[3], pagents[4], pagents[5]
-    );
-
-    status->SetValue(wxString::FromAscii(status_text));
+    /* Atualiza o texto da porcentagem de cada agente presente no time. */
+    team_tree_ctrl->SetItemText(agents_tree_id[THREE_OPT], _T("1-3OPT (") + wxString::Format(wxT("%.2f%)"), pagents[THREE_OPT]));
+    team_tree_ctrl->SetItemText(agents_tree_id[SUBG], _T("2-SUBG (") + wxString::Format(wxT("%.2f%)"), pagents[SUBG]));
+    team_tree_ctrl->SetItemText(agents_tree_id[LS], _T("3-LS (") + wxString::Format(wxT("%.2f%)"), pagents[LS]));
+    team_tree_ctrl->SetItemText(agents_tree_id[PERT], _T("4-PERT (") + wxString::Format(wxT("%.2f%)"), pagents[PERT]));
+    team_tree_ctrl->SetItemText(agents_tree_id[CONS], _T("5-CONS (") + wxString::Format(wxT("%.2f%)"), pagents[CONS]));
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -524,6 +483,39 @@ void MainFrame::initMD()
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------------------- */
 
+wxString MainFrame::getTime()
+{
+    wxString str_hour, str_minute, str_second;
+    wxDateTime now = wxDateTime::Now();
+
+    int int_hour = now.GetHour();
+    int int_minute = now.GetMinute();
+    int int_second = now.GetSecond();
+
+    if (int_hour < 10)
+    {
+        if (int_hour > 0) str_hour = wxString::Format(wxT("0%i"), wxDateTime::ConvertYearToBC(int_hour));
+        else str_hour = wxString::Format(wxT("00"));
+    }
+    else str_hour = wxString::Format(wxT("%i"), wxDateTime::ConvertYearToBC(int_hour));
+
+    if (int_minute < 10)
+    {
+        if (int_minute > 0) str_minute = wxString::Format(wxT("0%i"), wxDateTime::ConvertYearToBC(int_minute));
+        else str_minute = wxString::Format(wxT("00"));
+    }
+    else str_minute = wxString::Format(wxT("%i"), wxDateTime::ConvertYearToBC(int_minute));
+
+    if (int_second < 10)
+    {
+        if (int_second > 0) str_second = wxString::Format(wxT("0%i"), wxDateTime::ConvertYearToBC(int_second));
+        else str_second = wxString::Format(wxT("00"));
+    }
+    else str_second = wxString::Format(wxT("%i"), wxDateTime::ConvertYearToBC(int_second));
+
+    return str_hour + _(":") + str_minute + _(":") + str_second;
+}
+
 
 
 MyTreeItemData::MyTreeItemData(int type, int *params):wxTreeItemData()
@@ -534,6 +526,12 @@ MyTreeItemData::MyTreeItemData(int type, int *params):wxTreeItemData()
 
 void MyTreeItemData::GetId(){}
 void MyTreeItemData::SetId(){}
+
+void MyTreeItemData::SetParams(int *params)
+{
+    if (params_t != NULL) free(params_t);
+    params_t = params;
+}
 
 int MyTreeItemData::GetType()
 {

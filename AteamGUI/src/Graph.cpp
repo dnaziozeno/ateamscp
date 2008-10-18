@@ -130,7 +130,7 @@ void MyCanvas::OnDraw(wxDC& dc)
     wxBrush brush(*wxBLACK_BRUSH);
     dc.SetBackground(brush);
     //Plot1(dc,0,0);
-    //Plot2(dc,0,0);
+    Plot2(dc,0,0);
 }
 
 /* ------------------------------------------------------------------------------------- */
