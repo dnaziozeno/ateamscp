@@ -1,0 +1,21 @@
+O arquivo contem ''fotos'' da memoria de solucoes primais
+Tempo    -> Tempo entre o inicio do A-Team e a foto
+THeur    -> Tempo de execucao de cada uma das heuristica
+Prop     -> Nr de sol. primais propostas a memoria
+Acei     -> Nr de sol. primais prop. e aceitas pela mem
+Igual    -> Nr de sol. primais prop. nao aceitas iguais
+Pior     -> Nr de sol. primais prop. pior que pior da mem
+%Pior    -> Taxa de proposicao de sol. duais piores
+%Acei    -> Taxa de aceitacao das sol. duais propostas
+SolPrimal-> Valor do melhor solucao primal encontrada
+
+            Numero de Linhas   =   200 
+            Numero de Colunas  =  1000 
+            Densidade          =  4.00 
+            Tamanho Mem Primal =   600 
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+ Tempo  Theur   Prop   Acei  Igual   Pior  %Pior  %Acei    SolPrimal      GPrimal    %   RandAdjust    %    LocSearch    %     Consenso    %
+     0      0      1      1      0      0    0.0  100.0      172.000      172.000  0.2        0.000  0.0        0.000  0.0        0.000  0.0
+     0      0     85     78      7      0    0.0   91.8      164.000      164.000 13.0        0.000  0.0        0.000  0.0        0.000  0.0
+    68      0  34685    429  34256      0    0.0    1.2      164.000      164.000 71.5        0.000  0.0        0.000  0.0        0.000  0.0

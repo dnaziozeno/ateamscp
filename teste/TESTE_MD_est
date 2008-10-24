@@ -1,0 +1,32 @@
+O arquivo contem ''fotos'' da memoria de solucoes duais
+Tempo    -> Tempo entre o inicio do A-Team e a foto
+SolDual  -> Valor do melhor solucao dual encontrada
+DProp    -> Nr de sol. duais propostas a memoria
+DAcei    -> Nr de sol. duais prop. e aceitas pela mem
+DIgua    -> Nr de sol. duais prop. nao aceitas iguais
+DPior    -> Nr de sol. duais prop. pior que pior da mem
+DualPior -> Taxa de proposicao de sol. duais piores
+DualAcei -> Taxa de aceitacao das sol. duais propostas
+
+            Numero de Linhas   =    200
+            Numero de Colunas  =   1000
+            Densidade          =   4.00
+            Tamanho Mem Dual   =    300
+            Tamanho Mem Cortes =  50021
+
+--------------------------------------------------------------------------------------------------------------------------------
+ Tempo Theur   Prop   Acei  Igual   Pior  %Pior  %Acei       SolDual  Cut       GDual    %      Subgrad    %    3-Optimum    %
+     0      0      1      1      0      0    0.0  100.0       116.196   0      116.196  0.3        0.000  0.0        0.000  0.0
+     0      0      3      3      0      0    0.0  100.0       121.806   0      121.806  1.0        0.000  0.0        0.000  0.0
+     0      0     17     17      0      0    0.0  100.0       122.539   0      122.539  5.7        0.000  0.0        0.000  0.0
+     1      0     21     21      0      0    0.0  100.0       123.542   0      123.542  7.0        0.000  0.0        0.000  0.0
+    61      0    151    151      0      0    0.0  100.0       130.000   0      130.000 50.3        0.000  0.0        0.000  0.0
+   114      0   1303   1002    301      0    0.0   76.9       148.426   0      130.000 99.7      148.426  0.3        0.000  0.0
+   114      0   1310   1008    302      0    0.0   76.9       149.419   0      130.000 99.3      149.419  0.7        0.000  0.0
+   116      1   1376   1056    320      0    0.0   76.7       149.518   0      130.000 98.3      149.518  1.7        0.000  0.0
+   117      1   1434   1102    332      0    0.0   76.8       149.917   0      130.000 97.3      149.917  2.7        0.000  0.0
+   120      3   1557   1180    377      0    0.0   75.8       150.065   0      130.000 94.7      150.065  5.3        0.000  0.0
+   123      5   1729   1304    425      0    0.0   75.4       150.450   0      130.000 92.3      150.450  7.7        0.000  0.0
+   132     58   2149   1606    543      0    0.0   74.7       150.450   0      131.000 86.3      150.450 13.7        0.000  0.0
+   139     62   2366   1769    597      0    0.0   74.8       150.450   0      132.000 85.0      150.450 15.0        0.000  0.0
+   151     23   2796   2076    720      0    0.0   74.2       150.552   0      132.000 81.7      150.552 18.3        0.000  0.0
