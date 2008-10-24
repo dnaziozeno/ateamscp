@@ -17,8 +17,6 @@
 /* agentes do ATeam distribuido para o Set Covering Problem.                 */
 /* ------------------------------------------------------------------------- */
 
-#include <mpi.h>
-
 /* ------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------- */
@@ -90,17 +88,7 @@ void GenBRCuts(int        *nb_cuts,
 	       CutType    *cut);
 void GetTimes(char AddTime);
 char MaxExeTimeCron();
-/*
-void RequestDualSol(char        best_solution,
-		    char       *stop,
-		    int         probab,
-		    int        *cut,
-		    double     *var_u,
-		    double     *red_cost,
-		    DualType   *DualSol,
-		    Agents      requester,
-		    DPSK_CLASS *ServMDClass);
-*/
+
 void RequestDualSol(char        best_solution,
 		    char       *stop,
 		    int         probab,
@@ -110,37 +98,30 @@ void RequestDualSol(char        best_solution,
 		    DualType   *DualSol,
 		    Agents      requester,
 		    MPI_Comm   communicator);
-
-/*
-void SendDualSolutiontoServer(char       *stop,
-			      char       *sleep,
-			      char       *new_problem,
-			      DualType   *DualSol,
-			      DPSK_CLASS *ServMDClass);
-			      
-*/			      
+		      
 void SendDualSolutiontoServer(char       *stop,
 			      			  char       *sleep_ag,
 			                  char       *new_problem,
 			                  DualType   *DualSol,
 			                  MPI_Comm   communicator);			      
-/*
+
 void RequestPrimalSol(char        best_solution,
-		      char       *stop,
-		      int         probab,
-		      int        *var_x,
-		      PrimalType *PrimalSol,
-		      DPSK_CLASS *ServMPClass);
+				      char       *stop,
+				      int         probab,
+				      int        *var_x,
+				      PrimalType *PrimalSol,
+				      MPI_Comm   communicator);
 		      
 void SendPrimalSolutiontoServer(char       *stop,
-				char       *sleep,
-				PrimalType *PrimalSol,
-				DPSK_CLASS *ServMPClass);
+				                char       *sleep,
+				                PrimalType *PrimalSol,
+				                MPI_Comm communicator);
+
 void RequestNCutstoServer(char       *stop,
-			  int        *nb_cuts,
-			  CutType    *cut,
-			  DPSK_CLASS *ServMDClass);
-*/ 
+			              int        *nb_cuts,
+			              CutType    *cut,
+			              MPI_Comm   communicator);
+ 
 void RequestCutsofSoltoServer(char       *stop,
 			      CutType    *cut,
 			      DualType   *DualSol,
@@ -156,13 +137,12 @@ void AddCutstoProblem(int       nb_cuts,
 		      CutType  *cut,
 		      DualType *DualSol);
 void ExcludeCutsofProblem(int nb_cuts);
+
+//void StopAteam(MPI_Comm commMD, MPI_Comm commMP);
 /*
-void StopAteam(DPSK_CLASS *ServMDClass,
-	       DPSK_CLASS *ServMPClass);
 void FinishInitServer(DPSK_CLASS *ServMemClass);
-void GetResultsPath(char       *path,
-		    DPSK_CLASS *ServMemClass);
 */
+void GetResultsPath(char *path, MPI_Comm communicator);
 /* ------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
 /* ------------------------------------------------------------------------- */

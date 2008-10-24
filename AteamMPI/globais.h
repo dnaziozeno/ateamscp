@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <values.h>
 #include <time.h>
+#include <mpi.h>
 //HHHH
 /*
 extern "C" { int             getrusage(int,struct rusage*);
@@ -49,7 +50,7 @@ extern "C" { int             getrusage(int,struct rusage*);
 #define FALSE            0
 #define epsilon          10e-8
 #define TimeWaiting      120
-#define TotalAgents      10
+#define TotalAgents      11
 #define NbDualAgents     4
 #define NbPrimalAgents   6
 #define LinearIncr       0

@@ -208,14 +208,16 @@ void RecalcDeltaU(int       best_i,
 	 { delta_u[Ij->lin] = aux_delta;
 	   if (delta_u[Ij->lin] <= epsilon)
 	    { i = inact[Ij->lin];
-	      inact[Ij->lin] = -1;
-	      (I_u[nb_lin])--;
-	      I_u[i] = I_u[I_u[nb_lin]];
-	      if (i < I_u[nb_lin])
-		inact[I_u[i]] = i;
+	      if(inact[Ij->lin] >= 0)
+	      { 
+	        (I_u[nb_lin])--;
+	        I_u[i] = I_u[I_u[nb_lin]];
+	        if (i < I_u[nb_lin])
+		      inact[I_u[i]] = i;
+		   }
 	    }
-         }
-	Ij = Ij->down;
+     }
+	 Ij = Ij->down;
       }
      Ji = Ji->right;
    }

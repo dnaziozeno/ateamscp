@@ -59,14 +59,14 @@ void RequestDualSol(char        best_sol,
   char * buffer;
   
   
-  sizeOfBuffer =   sizeof(int) + sizeof(char) + sizeof(int) + sizeof(Agents);
+  sizeOfBuffer =   (sizeof(int) + sizeof(char) + sizeof(int) + sizeof(unsigned int));
   buffer = malloc(sizeOfBuffer);
   
-  printf("\n\nIniciando o empacotamento em agentrot Request \n\n");
   MPI_Pack(&method, 1, MPI_INT, buffer, sizeOfBuffer, &positionSend, communicator);
   MPI_Pack(&best_sol, 1, MPI_CHAR, buffer, sizeOfBuffer, &positionSend, communicator);
   MPI_Pack(&probab, 1, MPI_INT, buffer, sizeOfBuffer, &positionSend, communicator);
   MPI_Pack(&requester, 1, MPI_UNSIGNED, buffer, sizeOfBuffer, &positionSend, communicator);
+   
    
   MPI_Send(buffer, positionSend, MPI_PACKED, 0, 1, communicator); 
   
@@ -80,10 +80,7 @@ void RequestDualSol(char        best_sol,
   /* A espera das solucoes*/
   MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
   MPI_Get_count(&status, MPI_PACKED, &sizeMessage);
-  
-  printf("\n === agentrot: sizeMessage %d \n", sizeMessage); 
-
-  
+ 
   bufferRecv = malloc(sizeMessage);
   MPI_Recv(bufferRecv, sizeMessage, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
  
@@ -99,24 +96,33 @@ void RequestDualSol(char        best_sol,
      MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &DualSol->nb_cuts, 1, MPI_INT, communicator);
      
      if (DualSol->nb_cuts > 0){
-         MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, cut, DualSol->nb_cuts, MPI_INT, communicator);      
+     	 // nao MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, DualSol->cut, DualSol->nb_cuts, MPI_INT, communicator);      
+         //MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, cut, DualSol->nb_cuts, MPI_INT, communicator);      
+         MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, cut, CutsofSol, MPI_INT, communicator);      
          DualSol->cut = cut;
      }
      MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &DualSol->proc_time, 1, MPI_LONG, communicator);
      MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &DualSol->value, 1, MPI_DOUBLE, communicator);
-      
-     MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, red_cost, 1, MPI_DOUBLE, communicator);
+     
+     
+     //MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, DualSol->red_cost, 1, MPI_DOUBLE, communicator); 
+     //MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, red_cost, 1, MPI_DOUBLE, communicator);
+     MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, red_cost, nb_col, MPI_DOUBLE, communicator);
+     
      DualSol->red_cost = red_cost;
      
      int sizeVar_u = 0;
-     sizeVar_u = nb_lin + DualSol->nb_cuts;
+     //sizeVar_u = nb_lin + DualSol->nb_cuts;
+     sizeVar_u = nb_lin + CutsofSol;
+     
+     //MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, DualSol->var_u, sizeVar_u, MPI_DOUBLE, communicator);
      MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, var_u, sizeVar_u, MPI_DOUBLE, communicator);
      DualSol->var_u = var_u;
      
      MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &DualSol->agent_ID, 1, MPI_UNSIGNED, communicator);
      
    }
-   printf("\n === Fim RequestDualSol");  
+   //printf("\n === Fim RequestDualSol");  
    free(bufferRecv);
    
 }
@@ -159,17 +165,18 @@ void SendDualSolutiontoServer(char       *stop,
   MPI_Pack(stop, 1, MPI_CHAR, buffer, sizeOfBuffer, &position, communicator);
   MPI_Pack(&DualSol->value, 1, MPI_DOUBLE, buffer, sizeOfBuffer, &position, communicator);
   MPI_Pack(DualSol->red_cost, nb_col, MPI_DOUBLE, buffer, sizeOfBuffer, &position, communicator);
-  MPI_Pack(DualSol->var_u, max_lin, MPI_DOUBLE, buffer, sizeOfBuffer, &position, communicator);
+  MPI_Pack(DualSol->var_u, nb_lin, MPI_DOUBLE, buffer, sizeOfBuffer, &position, communicator);
   MPI_Pack(&DualSol->agent_ID, 1, MPI_UNSIGNED, buffer, sizeOfBuffer, &position, communicator);
   MPI_Pack(&DualSol->improved_sol, 1, MPI_CHAR, buffer, sizeOfBuffer, &position, communicator);
   MPI_Pack(DualSol->agent, TotalAgents, MPI_CHAR, buffer, sizeOfBuffer, &position, communicator);
   MPI_Pack(&DualSol->nb_cuts, 1, MPI_INT, buffer, sizeOfBuffer, &position, communicator);
   
+  //printf("\n cut %d", DualSol->nb_cuts);
   if (DualSol->nb_cuts > 0)
   {  	
    	 MPI_Pack(DualSol->cut, CutsofSol, MPI_DOUBLE, buffer, sizeOfBuffer, &position, communicator);
   }
-  else DualSol->cut = NULL;
+  //else DualSol->cut = NULL;
    
   MPI_Pack(&DualSol->proc_time, 1, MPI_LONG, buffer, sizeOfBuffer, &position, communicator); 
   MPI_Send(buffer, position, MPI_PACKED, 0, 1, communicator);
@@ -187,109 +194,131 @@ void SendDualSolutiontoServer(char       *stop,
   
   //printf("root antes recv \n\n");
   
-  MPI_Recv(&messageConfirm, 3, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
+  MPI_Recv(messageConfirm, 3, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
   
   //printf("root depois do revc  \n\n");
   MPI_Unpack(messageConfirm, 3 * sizeof(char), &positionConfirm, stop, 1, MPI_CHAR, communicator);
   MPI_Unpack(messageConfirm, 3 * sizeof(char), &positionConfirm, sleep_ag, 1, MPI_CHAR, communicator);
   MPI_Unpack(messageConfirm, 3 * sizeof(char), &positionConfirm, new_problem, 1, MPI_CHAR, communicator);
  
-  //printf("Fim root \n\n");
+  //printf("\n\n === Fim agentrot SendDual \n\n");
 }
 
 /* ------------------------------------------------------------------------- */
-
-/*
 void RequestPrimalSol(char        best_sol,
 		      char       *stop,
 		      int         probab,
 		      int        *var_x,
 		      PrimalType *PrimalSol,
-		      DPSK_CLASS *ServMPClass)
+		      MPI_Comm communicator)
 {
   void        *values      = NULL;
-  DPSK_SLOT    method("Function",REQUEST_SOLUTION),
-               Rec0("Stop"),
-               Rec1("Value"),
-               Rec2("Var"),
-              *RRec1       = NULL,
-              *RRec2       = NULL,
-              *aux         = NULL;
-  DPSK_OBJECT *MethodParam = NULL,
-              *Result      = NULL;
-
- // O agente requisita ao servidor de memoria primal uma solucao primal
-  RRec1       = new DPSK_SLOT ("BestSol",(void *)(&best_sol),sizeof(char));
-  RRec2       = new DPSK_SLOT ("Probab",(void *)(&probab),sizeof(int));
-  MethodParam = new DPSK_OBJECT ("Param", &method, RRec1, RRec2, NULL);
-  Result      = ServMPClass -> CallMethod ("TALK", MethodParam);
-  aux         = Result -> GetSlot (&Rec0);
-  *stop       = *(char *) (aux -> GetValue());
-  delete(aux);
-  if (!*stop)
-   { aux        = Result -> GetSlot (&Rec1);
-     *PrimalSol = *(PrimalType *) (aux -> GetValue());
-     delete(aux);
-
-     aux    = Result -> GetSlot (&Rec2);
-     values = (int *) (aux -> GetValue());
-     memcpy(var_x,values,nb_col * sizeof(int));
-     PrimalSol->var_x = var_x;
-     delete(aux);
-   }
-  delete(MethodParam);
-  delete(Result);
-  delete(RRec1);
-  delete(RRec2);
-}
-
-/* ------------------------------------------------------------------------- */
-/*
-void SendPrimalSolutiontoServer(char       *stop,
-				char       *sleep_ag,
-				PrimalType *PrimalSol,
-				DPSK_CLASS *ServMPClass)
-{
-  DPSK_SLOT    method("Function",AGENT_SEND_SOLUTION),
-               ReturnStop("Stop"),
-               ReturnSleep("Sleep"),
-              *Rec1        = NULL,
-              *Rec2        = NULL,
-              *aux         = NULL;
-  DPSK_OBJECT *MethodParam = NULL,
-              *Result      = NULL;
-
-  // O agente envia a solucao gerada ou modificada por um dos agentes primais
-     //para o servidor de memoria de solucoes primais. 
-  Rec1        = new DPSK_SLOT("Value",(void *)(PrimalSol),sizeof(PrimalType));
-  Rec2        = new DPSK_SLOT("Var",(void *)(PrimalSol->var_x),
-			      nb_col * sizeof(int));
-  MethodParam = new DPSK_OBJECT ("Param", &method,Rec1,Rec2, NULL);
-  Result      = ServMPClass->CallMethod("TALK",MethodParam);
+  int method = REQUEST_SOLUTION,
+      sizeOfBuffer = 0,
+      position = 0;
+             
+  char *buffer;
   
-  // O servidor de memoria de solucoes primais retorna um indicativo de fina-
-     lizacao ou nao do agente. 
-  aux   = Result -> GetSlot(&ReturnStop);
-  *stop = *(char *) (aux -> GetValue());
-  delete(aux);
-  aux       = Result -> GetSlot(&ReturnSleep);
-  *sleep_ag = *(char *) (aux -> GetValue());
-  delete(aux);
+  
+  sizeOfBuffer = ((sizeof(int))  + (sizeof(char)) + 
+                  (sizeof(int))); 
+  
+  buffer = malloc(sizeOfBuffer);
+  
+  MPI_Pack(&method, 1, MPI_INT, buffer, sizeOfBuffer, &position, communicator);
+  MPI_Pack(&best_sol, 1, MPI_CHAR, buffer, sizeOfBuffer, &position, communicator);
+  MPI_Pack(&probab, 1, MPI_INT, buffer, sizeOfBuffer, &position, communicator);
 
-  delete(MethodParam);
-  delete(Result);
-  delete(Rec1);
-  delete(Rec2);
+  MPI_Send(buffer, position, MPI_PACKED, 0, 1, communicator);
+  
+
+  free(buffer);
+  
+  
+  MPI_Status status;
+  int positionRecv = 0;
+  int sizeOfMessage = 0;
+  
+  MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
+  MPI_Get_count(&status, MPI_PACKED, &sizeOfMessage);
+  
+  
+  buffer = malloc(sizeOfMessage);
+  
+  
+  MPI_Recv(buffer, sizeOfMessage, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
+  
+  MPI_Unpack(buffer, sizeOfMessage, &positionRecv, stop, 1, MPI_CHAR, communicator);
+  
+  if (!*stop)
+  { MPI_Unpack(buffer, sizeOfMessage, &positionRecv, PrimalSol->agent, TotalAgents, MPI_CHAR, communicator);
+    MPI_Unpack(buffer, sizeOfMessage, &positionRecv, var_x, nb_col, MPI_INT, communicator);
+    PrimalSol->var_x = var_x;
+    MPI_Unpack(buffer, sizeOfMessage, &positionRecv, &PrimalSol->proc_time, 1, MPI_INT, communicator);
+    MPI_Unpack(buffer, sizeOfMessage, &positionRecv, &PrimalSol->value, 1, MPI_DOUBLE, communicator);
+    MPI_Unpack(buffer, sizeOfMessage, &positionRecv, &PrimalSol->agent_ID, 1, MPI_UNSIGNED, communicator);
+  }
+  free(buffer);
+  //printf("\n\n === Fim o empacotamento em agentrot RequestPrimal \n\n");
 }
-*/
+
 /* ------------------------------------------------------------------------- */
-/*
-void RequestNCutstoServer(char       *stop,
-			  int        *nb_cuts,
-			  CutType    *cut,
-			  DPSK_CLASS *ServMDClass)
+void SendPrimalSolutiontoServer(char       *stop,
+				                char       *sleep_ag,
+				                PrimalType *PrimalSol,
+				                MPI_Comm communicator)
 {
-  short       *coef        = NULL,
+ 
+  int method = AGENT_SEND_SOLUTION,
+      sizeOfBuffer = 0,
+      position = 0;
+             
+  char *buffer;
+  
+  
+  sizeOfBuffer = ( (sizeof(int)) + 
+                   ((sizeof(char)) * TotalAgents) + 
+                   ((sizeof(int)) * nb_col) +
+                   (sizeof(int)) + 
+                   (sizeof(double)) + 
+                   sizeof(unsigned int)
+                  ); 
+   
+  buffer = malloc(sizeOfBuffer);
+  
+  MPI_Pack(&method, 1, MPI_INT, buffer, sizeOfBuffer, &position, communicator);
+  MPI_Pack(PrimalSol->agent, TotalAgents, MPI_CHAR, buffer, sizeOfBuffer, &position, communicator);
+  MPI_Pack(PrimalSol->var_x, nb_col, MPI_INT, buffer, sizeOfBuffer, &position, communicator);
+  MPI_Pack(&PrimalSol->proc_time, 1, MPI_INT, buffer, sizeOfBuffer, &position, communicator);
+  MPI_Pack(&PrimalSol->value, 1, MPI_DOUBLE, buffer, sizeOfBuffer, &position, communicator);  
+  MPI_Pack(&PrimalSol->agent_ID, 1, MPI_UNSIGNED, buffer, sizeOfBuffer, &position, communicator);
+  
+  // O agente envia a solucao gerada ou modificada por um dos agentes primais
+  //para o servidor de memoria de solucoes primais. 
+  
+  MPI_Send(buffer, position, MPI_PACKED, 0, 1, communicator);
+  
+  
+  char messageConfirm[2 * sizeof(char)];
+  MPI_Status status;
+  int positionConfirm = 0;
+  
+  MPI_Recv(messageConfirm, 2, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
+  MPI_Unpack(messageConfirm, 2 * sizeof(char), &positionConfirm, stop, 1, MPI_CHAR, communicator);
+  MPI_Unpack(messageConfirm, 2 * sizeof(char), &positionConfirm, sleep_ag, 1, MPI_CHAR, communicator);
+  
+  free(buffer);
+  //printf("\n\n === Fim agentrot SendPrimal \n\n");
+}
+/* ------------------------------------------------------------------------- */
+
+void RequestNCutstoServer(char       *stop,
+			  		      int        *nb_cuts,
+			  			  CutType    *cut,
+			              MPI_Comm   communicator)
+{
+	*nb_cuts    = 0;
+  /*short       *coef        = NULL,
               *cut_set     = NULL;
   int          i           = 0;
   CutType     *new_cuts    = NULL;
@@ -333,6 +362,7 @@ void RequestNCutstoServer(char       *stop,
      delete(Result);
    }
   delete(MethodParam);
+  */ 
 }
 
 /* ------------------------------------------------------------------------- */
@@ -341,28 +371,13 @@ void RequestCutsofSoltoServer(char       *stop,
 			      DualType   *DualSol,
 			      MPI_Comm   communicator)
 {
-  short       *coef        = NULL,
+  /*short       *coef        = NULL,
               *cut_set     = NULL;
   int          i           = 0;
   CutType     *new_cuts    = NULL;
-  /*DPSK_SLOT    method("Function",REQUEST_CUTS_OF_SOL),
-               RRec0("Stop"),
-               RRec1("Cut"),
-               RRec2("Coef"),
-              *Rec1        = NULL,
-              *Rec2        = NULL,
-              *aux         = NULL;
-  DPSK_OBJECT *MethodParam = NULL,
-              *Result      = NULL;
-  */
-  // O agente envia ao servidor de cortes os numeros dos cortes que fazem par-
-  //   te da solucao a ser trabalhada, o servidor retorna os cortes em questao 
-  /*Rec1 = new DPSK_SLOT("NCuts",(void *)(&(DualSol->nb_cuts)),sizeof(int));
-  Rec2 = new DPSK_SLOT("Cut",(void *)(DualSol->cut),CutsofSol * sizeof(int));
-  MethodParam = new DPSK_OBJECT("Param",&method,Rec1,Rec2,NULL);
-  Result      = ServMDClass->CallMethod("TALK",MethodParam);
-  */
   
+  */
+  /*
   char * buffer,
        * bufferRecv;
   int  position = 0,
@@ -382,12 +397,12 @@ void RequestCutsofSoltoServer(char       *stop,
   MPI_Send(buffer, position, MPI_PACKED, 0, 1, communicator); 
   
   free(buffer);
-  
+  */
   /* A espera das solucoes*/
-  MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
+  /* MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
   MPI_Get_count(&status, MPI_PACKED, &sizeMessage);
   bufferRecv = malloc(sizeMessage);
-  
+  */
   
   /*
    * 
@@ -404,20 +419,21 @@ void RequestCutsofSoltoServer(char       *stop,
   MPI_Pack(cut_set, CutsofSol * nb_col, MPI_SHORT, bufferSend, sizeMessage, &positionSend, communicator);
   
    * */
-  MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, stop, 1, MPI_CHAR, communicator);
+  /*
+   * MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, stop, 1, MPI_CHAR, communicator);
   if (!*stop)
   {
   	MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, stop, 1, MPI_CHAR, communicator);
   	MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->used, 1, MPI_CHAR, communicator);
     MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->chosen, 1, MPI_CHAR, communicator);
-    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->rhs, 1, MPI_CHAR, communicator);
-    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, new_cuts->coef, 1, MPI_CHAR, communicator);
-    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->col_cut, 1, MPI_CHAR, communicator);
-    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->tab_pos, 1, MPI_CHAR, communicator);
-    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->nb_sol, 1, MPI_CHAR, communicator);
-    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->next, 1, MPI_CHAR, communicator);
-    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->key, 1, MPI_CHAR, communicator);
-    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, cut_set, CutsofSol * nb_col, MPI_CHAR, communicator);
+    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->rhs, 1, MPI_SHORT, communicator);
+    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, new_cuts->coef, 1, MPI_SHORT, communicator);
+    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->col_cut, 1, MPI_INT, communicator);
+    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->tab_pos, 1, MPI_INT, communicator);
+    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->nb_sol, 1, MPI_INT, communicator);
+    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->next, 1, MPI_INT, communicator);
+    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, &new_cuts->key, 1, MPI_LONG, communicator);
+    MPI_Unpack(bufferRecv, sizeMessage, &positionRecv, cut_set, CutsofSol * nb_col, MPI_SHORT, communicator);
   
     for (i = 0; i < DualSol->nb_cuts; i++)
     { 
@@ -511,7 +527,7 @@ void SendCutstoServer(char       *stop,
 void AddCutstoProblem(int       new_cuts,
 		      CutType  *cut,
 		      DualType *DualSol)
-{
+{/*
   int    j   = 0,
          k   = 0;
   DList *aux = NULL;
@@ -542,13 +558,14 @@ void AddCutstoProblem(int       new_cuts,
       }
      nb_lin++;
    }
+   */ 
 }
 
 /* ------------------------------------------------------------------------- */
 
 void ExcludeCutsofProblem(int nb_cuts)
 {
-  int    i   = 0,
+ /* int    i   = 0,
          end = 0;
   DList *Ji  = NULL,
         *aux = NULL;
@@ -567,27 +584,27 @@ void ExcludeCutsofProblem(int nb_cuts)
       }
    }
   nb_lin = end;
+  */ 
 }
 
 /* ------------------------------------------------------------------------- */
 
-void StopAteam(MPI_Comm commMD,
-	           MPI_Comm commMP)
+void StopAteam(MPI_Comm commMD, MPI_Comm commMP)
 {
   int  method = 0,
        position = 0;
-  char bufferMD[100],
-       bufferMP[100];
+  char bufferMD[10],
+       bufferMP[10];
   
   method = STOP_ATEAM;
   
   if (commMD){
-    MPI_Pack(&method, 1, MPI_INT, bufferMD, 100, &position, commMD);
+    MPI_Pack(&method, 1, MPI_INT, bufferMD, 10, &position, commMD);
     MPI_Send(bufferMD, position, MPI_PACKED, 0, 1, commMD);
   }
   position = 0;
   if (commMP){
-    MPI_Pack(&method, 1, MPI_INT, bufferMD, 100, &position, commMP);
+    MPI_Pack(&method, 1, MPI_INT, bufferMP, 10, &position, commMP);
     MPI_Send(bufferMP, position, MPI_PACKED, 0, 1, commMP);
   }
 }
@@ -607,28 +624,42 @@ void FinishInitServer(DPSK_CLASS *ServMemClass)
 }
 
 /* ------------------------------------------------------------------------- */
-/*
-void GetResultsPath(char       *path,
-		    DPSK_CLASS *ServMemClass)
+void GetResultsPath(char *path, MPI_Comm communicator)
 {
-  char        *path_aux    = NULL;
-  int          path_len    = 0;
-  DPSK_SLOT    method("Function",GET_RESULTS_PATH),
-               Rec0("PathLen"),
-               Rec1("Path"),
-              *aux         = NULL;
-  DPSK_OBJECT *MethodParam = NULL,
-              *Result      = NULL;
-
-  MethodParam = new DPSK_OBJECT("Param", &method, NULL);
-  Result      = ServMemClass->CallMethod("TALK",MethodParam);
-  aux         = Result -> GetSlot (&Rec0);
-  path_len    = *(int *) (aux -> GetValue());
-  aux         = Result -> GetSlot (&Rec1);
-  path_aux    = (char *) (aux -> GetValue());
-  strncpy(path,path_aux,path_len);
-  delete(MethodParam);
-  delete(Result);
+  char *path_aux    = NULL;
+  int  path_len    = 0,
+       method = GET_RESULTS_PATH;
+  
+  char buffer[sizeof(int)]; 
+  int  position = 0;
+  MPI_Status status;
+  
+  
+  MPI_Pack(&method, 1, MPI_INT, buffer, sizeof(int), &position, communicator);
+  MPI_Send(buffer, position, MPI_PACKED, 0, 1, communicator);
+  
+  //printf("\n == first \n");
+  
+  char * bufferRecv;
+  int positionRecv = 0;
+  int sizeOfMessage = 0;
+  
+  MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
+  MPI_Get_count(&status, MPI_PACKED, &sizeOfMessage);
+  
+  
+  bufferRecv = malloc(sizeOfMessage);
+  
+  MPI_Recv(bufferRecv, sizeOfMessage, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, communicator, &status);
+  MPI_Unpack(bufferRecv, sizeOfMessage, &positionRecv, &path_len, 1, MPI_INT, communicator);
+  
+  path_aux =  malloc(sizeof(char) * path_len);
+  MPI_Unpack(bufferRecv, sizeOfMessage, &positionRecv, path_aux, path_len, MPI_CHAR, communicator);
+  
+  strncpy(path, path_aux,path_len);
+  
+  free(bufferRecv);
+  free(path_aux);
 }
 
 /* ------------------------------------------------------------------------- */

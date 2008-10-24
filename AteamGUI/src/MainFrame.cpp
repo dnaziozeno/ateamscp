@@ -47,6 +47,8 @@ InitMemories *init_memories;
 int nagents[6];
 float pagents[6];
 
+extern MPI_Comm comm_three_opt;
+
 /* ------------------------------------------------------------------------------------- */
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
@@ -126,8 +128,6 @@ void MainFrame::set_properties()
     statistics_3D_bar->Add( wxT("CONS"), 5, 0);
 statistics_3D_bar->Add( wxT("CONS"), 6, 0);
 statistics_3D_bar->Add( wxT("CONS"), 7, 0);
-statistics_3D_bar->Add( wxT("CONS"), 8, 0);
-statistics_3D_bar->Add( wxT("CONS"), 9, 0);
 
     statistics_chart = new wxChartCtrl(
         this, -1, (STYLE)(USE_AXIS_X|USE_AXIS_Y|USE_GRID),
@@ -178,6 +178,8 @@ void MainFrame::onStartClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void MainFrame::onStopClick(wxCommandEvent &event)
 {
+    MPI_Status status;
+
     stop_button->Disable();
     plot_button->Disable();
     add_button->Disable();
@@ -185,33 +187,55 @@ void MainFrame::onStopClick(wxCommandEvent &event)
     edit_button->Disable();
     start_button->Enable();
 
-    team_tree_ctrl->DeleteAllItems();
+    //team_tree_ctrl->DeleteAllItems();
 
-    nagents[0] = nagents[1] = nagents[2] = nagents[3] = nagents[4] = nagents[5] = 0;
-    pagents[0] = pagents[1] = pagents[2] = pagents[3] = pagents[4] = pagents[5] = 0.0;
+    wxTreeItemId current_agent_item_id;
+    MyTreeItemData *current_agent_item_data;
 
-    refresh_statistics();
-/*
+    for (int agent = THREE_OPT; agent <= CONS; agent++)
+    {
+        while (team_tree_ctrl->ItemHasChildren(agents_tree_id[agent]))
+        {
+            current_agent_item_id = team_tree_ctrl->GetLastChild(agents_tree_id[agent]);
+            current_agent_item_data = (MyTreeItemData *) team_tree_ctrl->GetItemData(current_agent_item_id);
+            onRemoveAgent(current_agent_item_data->GetType(), current_agent_item_data->GetComm());
+            team_tree_ctrl->Delete(current_agent_item_id);
+        }
+    }
+
+    //nagents[0] = nagents[1] = nagents[2] = nagents[3] = nagents[4] = nagents[5] = 0;
+    //pagents[0] = pagents[1] = pagents[2] = pagents[3] = pagents[4] = pagents[5] = 0.0;
+
+    //refresh_statistics();
+
     MPI_Comm interComSpawn1, interComSpawn2, interComSpawn3;
     int errcodes[1];
 
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/stopATEAM",
+        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/stopATEAM",
         MPI_ARGV_NULL, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn1, errcodes
     );
 
+    sleep(1);
+
+    //int teste = 0;
+    //MPI_Recv(&teste, 1, MPI_INT, 0, MPI_ANY_TAG, comm_three_opt, &status);
+
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/stopSERVER",
+        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/stopSERVER",
         MPI_ARGV_NULL, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn2, errcodes
     );
 
+    sleep(1);
+
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/stopFINAL",
+        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/stopFINAL",
         MPI_ARGV_NULL, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn3, errcodes
     );
 
+    sleep(1);
+
     MPI_Finalize();
-*/
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -222,12 +246,12 @@ void MainFrame::onPlotClick(wxCommandEvent &event)
 {
     if (frame == NULL)
     {
-        //frame = new Graph(this, -1, _T("wxPlot"), wxPoint(420, 80), wxSize(800, 400));
-        //frame->Show(true);
+        frame = new Graph(this, -1, _T("wxPlot"), wxPoint(420, 80), wxSize(800, 400));
+        frame->Show(true);
     }
     else
     {
-        //frame->Show(true);
+        frame->Show(true);
     }
 }
 
@@ -253,7 +277,7 @@ void MainFrame::onRemoveClick(wxCommandEvent &event)
         agent_id != agents_tree_id[PERT] && agent_id != agents_tree_id[CONS])
     {
         MyTreeItemData *agent_data = (MyTreeItemData *) team_tree_ctrl->GetItemData(agent_id);
-        onRemoveAgent(agent_data->GetType(), -1);
+        onRemoveAgent(agent_data->GetType(), agent_data->GetComm());
         team_tree_ctrl->Delete(agent_id);
     }
 }
@@ -310,9 +334,9 @@ void MainFrame::onApplyClick()
 /* int mpi_ref - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.                      */
 /* int *params - Ponteiro para o vetor de parametros do agente.                          */
 /* ------------------------------------------------------------------------------------- */
-void MainFrame::onAddAgent(int type, wxString ip, int mpi_ref, int *params)
+void MainFrame::onAddAgent(int type, wxString ip, MPI_Comm *mpi_ref, int *params)
 {
-    MyTreeItemData *data = new MyTreeItemData(type, params);
+    MyTreeItemData *data = new MyTreeItemData(type, mpi_ref, params);
 
     switch (type)
     {
@@ -352,8 +376,19 @@ void MainFrame::onAddAgent(int type, wxString ip, int mpi_ref, int *params)
 /*                                                                                       */
 /* PARAMETROS:                                                                           */
 /* ------------------------------------------------------------------------------------- */
-void MainFrame::onRemoveAgent(int type, int mpi_ref)
+void MainFrame::onRemoveAgent(int type, MPI_Comm *mpi_ref)
 {
+    char change[1];
+    int position = 0;
+    int size = sizeof(char);
+    char *buffer = (char *) malloc(size);
+
+    change[0] = 'S';
+    MPI_Pack(change, 1, MPI_CHAR, buffer, size, &position, *mpi_ref);
+    MPI_Send(change, 1, MPI_CHAR, 0, 1, *mpi_ref); 
+
+    free(buffer);
+
     switch (type)
     {
         case THREE_OPT:
@@ -415,8 +450,6 @@ void MainFrame::refresh_statistics()
     statistics_3D_bar->Add( wxT("CONS"), 5, pagents[5]);
 statistics_3D_bar->Add( wxT("CONS"), 6, pagents[5]);
 statistics_3D_bar->Add( wxT("CONS"), 7, pagents[5]);
-statistics_3D_bar->Add( wxT("CONS"), 8, pagents[5]);
-statistics_3D_bar->Add( wxT("CONS"), 9, pagents[5]);
 
     /* Cria o objeto que apresenta visualmente o gráfico */
     statistics_chart = new wxChartCtrl(
@@ -518,19 +551,30 @@ wxString MainFrame::getTime()
 
 
 
-MyTreeItemData::MyTreeItemData(int type, int *params):wxTreeItemData()
+MyTreeItemData::MyTreeItemData(int type, MPI_Comm *comm, int *params):wxTreeItemData()
 {
     type_t = type;
+    comm_t = comm;
     params_t = params;
 }
 
 void MyTreeItemData::GetId(){}
 void MyTreeItemData::SetId(){}
 
-void MyTreeItemData::SetParams(int *params)
+void MyTreeItemData::SetComm(MPI_Comm *comm)
 {
-    if (params_t != NULL) free(params_t);
-    params_t = params;
+    if (comm_t != NULL) free(comm_t);
+    comm_t = comm;
+}
+
+MPI_Comm *MyTreeItemData::GetComm()
+{
+    return comm_t;
+}
+
+void MyTreeItemData::SetType(int type)
+{
+    type_t = type;
 }
 
 int MyTreeItemData::GetType()
@@ -538,7 +582,14 @@ int MyTreeItemData::GetType()
     return type_t;
 }
 
+void MyTreeItemData::SetParams(int *params)
+{
+    if (params_t != NULL) free(params_t);
+    params_t = params;
+}
+
 int *MyTreeItemData::GetParams()
 {
     return params_t;
 }
+

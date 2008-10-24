@@ -17,8 +17,6 @@
 /* moria de solucoes duais.                                                  */
 /* ------------------------------------------------------------------------- */
 
-#include <mpi.h>
-
 char   DualWorst       = TRUE,
       *path            = NULL;
 int    nb_lin          = 0,

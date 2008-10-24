@@ -59,8 +59,8 @@ public:
     );
 
     void onApplyClick();
-    void onAddAgent(int type, wxString ip, int mpi_ref, int *params);
-    void onRemoveAgent(int type, int mpi_ref);
+    void onAddAgent(int type, wxString ip, MPI_Comm *mpi_ref, int *params);
+    void onRemoveAgent(int type, MPI_Comm *mpi_ref);
 
     void initMD();
     void ExecAgInitMD(MPI_Comm communicator);
@@ -96,9 +96,13 @@ protected:
 class MyTreeItemData: public wxTreeItemData {
 
 public:
-    MyTreeItemData(int type, int *params);
-    void GetId();
+    MyTreeItemData(int type, MPI_Comm *comm, int *params);
+
     void SetId();
+    void GetId();
+    void SetComm(MPI_Comm *comm);
+    MPI_Comm *GetComm();
+    void SetType(int type);
     int GetType();
     void SetParams(int *params);
     int *GetParams();
@@ -107,6 +111,7 @@ private:
 
 protected:
     int type_t;
+    MPI_Comm *comm_t;
     int *params_t;
 };
 

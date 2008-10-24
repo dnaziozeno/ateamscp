@@ -34,7 +34,6 @@ int    *I_u     = NULL,
 double *delta_u = NULL;
 
 void ExecAgInitMD(MPI_Comm comm);
-MPI_Comm InitMD(int argc,char *argv[]);
 
 /* ------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */
@@ -46,8 +45,9 @@ MPI_Comm InitMD(int argc,char *argv[]);
    arquivo que contem a instancia do SCP e o terceiro e' o nome do diretorio
    em que serao gerados os arquivos de estatisticas.
    ------------------------------------------------------------------------- */
-MPI_Comm InitMD(int argc,char *argv[])
+main(int argc,char *argv[])
 {
+
   int numSpawns = 1,                    /* Qtd de processos de serverMD      */ 
       errcodes[numSpawns],              /* Array de erros para o spawn. Um   */
   					                    /* código por processo               */										
@@ -57,41 +57,37 @@ MPI_Comm InitMD(int argc,char *argv[])
       rank;	
 	
 
+  printf("======================================\n");
+  printf("%s\n", argv[0]);
+  printf("%s\n", argv[1]);
+  printf("%s\n", argv[2]);
+  printf("%s\n", argv[3]);
 
-  MPI_Init(&argc, &argv);               /* Iniciando a biblioteca MPI        */
-
-  MPI_Comm_size(MPI_COMM_WORLD, &size); /* size contém a quantidade de pro-  
-  					                     do grupo                            */				 
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank); /* determina o rank dos processos em
-                                                                 em um grupo */	
-  MPI_Comm interComSpawn; 		        /* Comunicador resultante da chamada */
-                                        /* a rotina spawn()                  */
-  
+  MPI_Init(&argc, &argv);               
+  MPI_Comm_size(MPI_COMM_WORLD, &size);   					                     
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);                                         
+  MPI_Comm interComSpawn; 		        
+                                        
   char        	 *look        = NULL,
                  path[200];
   unsigned long  NbServerMD   = 0;
-
-
+               
   /* ReadAteamParam localizada em readparam.c */	
   MaxLenDualMem = (int)  ReadAteamParam(2);
   ReducPerc     = (int)  ReadAteamParam(12);
   RandomInitMD  = (char) ReadAteamParam(16);
-
+  
   /* OBS: Esse arquivo de ser passado por argv[2] */
   if (!(finput = fopen(argv[2],"r")))
    { printf("\n\n* Erro na abertura do arquivo %s. *",argv[2]);
      exit(1);
    }
   
-
    
   ReadSource();          /* Localizada em readsc.c */
   fclose(finput);
   Reduction(NULL,NULL); /* Localizada em reduction.c */
   srand48(time(NULL));
-
-printf("============================\n");
-  printf("%s\n", argv[0]);  
 
   if (argc == 4)
     strcpy(path,argv[3]);
@@ -103,14 +99,16 @@ printf("============================\n");
       argv[2] = (look + 1);
   strcat(path,argv[2]);
   
-  printf("argumento %s\n", argv[3]);
   
+  
+  char *param = malloc(200 * sizeof(char));
+  strcpy(param, path);
  
   /* ------------------------------------------------------------------------- */
   /* Iniciando o serverMD */
   
-   MPI_Comm_spawn("/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/serverMD", 
-        argv, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn, errcodes);		                  
+   MPI_Comm_spawn("/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/serverMD", 
+      &param, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn, errcodes);		                  
   /* ------------------------------------------------------------------------- */
   /* Espera bloqueante necessária para não dar crash */
   	
@@ -148,7 +146,7 @@ printf("============================\n");
   	  /* Conecta como serverMD */	
       MPI_Comm_connect(port, MPI_INFO_NULL, 0, MPI_COMM_SELF, &commServerMD);
 	  
-	  buffer = (char *) malloc(3 * sizeof(int) + sizeof(float) + sizeof(unsigned long));
+	  buffer = malloc(3 * sizeof(int) + sizeof(float) + sizeof(unsigned long));
       
       /* Sequência de empacotamento da primeira mensagem */
 	  MPI_Pack(&method, 1, MPI_INT, buffer, 3 * sizeof(int) + sizeof(float) + 
@@ -187,13 +185,11 @@ printf("============================\n");
    
    MPI_Send(&message, 1, MPI_INT, 0, 1, commServerMD);
  
-  return commServerMD;
-
-   //MPI_Comm_disconnect(&commServerMD);
+   MPI_Comm_disconnect(&commServerMD);
    //printf("\n\n* Termino do Agente InitMD *");
    //printf("\n* A memoria de solucoes duais foi inicializada. *\n");
    
-   //MPI_Finalize();
+   MPI_Finalize();
 }
      
 /* ------------------------------------------------------------------------- */
@@ -213,10 +209,11 @@ void ExecAgInitMD(MPI_Comm communicator)
   DualSol.var_u    = (double *) malloc(max_lin * sizeof(double));
   DualSol.red_cost = (double *) malloc(nb_col * sizeof(double));
   delta_u          = (double *) malloc(nb_lin * sizeof(double));
-  I_u              = (int *) malloc((2 * nb_lin+1) * sizeof(int));
+  //I_u              = (int *) malloc((2 * nb_lin+1) * sizeof(int));
+  I_u              = (int *) malloc((nb_lin + 1) * sizeof(int));
   inact            = (int *) malloc(nb_lin * sizeof(int));
   
-  I_u = I_u + nb_lin;
+  //I_u = I_u + nb_lin;
  /*   while ((count++ < MaxLenDualMem) && (!stop)) */
  
  while ((count++ < (MaxLenDualMem / 2)) && (!stop))
@@ -232,7 +229,7 @@ void ExecAgInitMD(MPI_Comm communicator)
  free(DualSol.var_u);
  free(DualSol.red_cost);
  free(delta_u);
- I_u = I_u - nb_lin;
+ //I_u = I_u - nb_lin;
  free(I_u);
  free(inact);
  

@@ -29,7 +29,6 @@
 		               /* estatisticas.                                      */
 
 #include <pthread.h>
-
 /*
 void RequestDualSolution(char         stop_ateam,
 			 DPSK_OBJECT *MethodParam,
@@ -40,9 +39,11 @@ void RequestBestDualSolution(char         stop_ateam,
 void AgentSendDualSolution(char        *stop_ateam,
 			   DPSK_OBJECT *MethodParam,
 			   DPSK_SHARED *call_ID);
+*/
 void RequestEmptyMemory(char        *stop_ateam,
-			DPSK_SHARED *call_ID);
-void RequestCuts(char         stop_ateam,
+			            MPI_Comm    communicator);
+			
+/*void RequestCuts(char         stop_ateam,
 		 DPSK_OBJECT *MethodParam,
 		 DPSK_SHARED *call_ID);
 */ 
@@ -63,13 +64,16 @@ void RequestDualSolution(char         stop_ateam,
 				 	     MPI_Comm     communicator);			 
 void AgentSendDualSolution(char *stop_ateam, char * buffer, int sizeBuffer,
                            int position, MPI_Comm communicator);
-void InitGlobalVars(char buffer[], int position, MPI_Comm communicator);
-/*		    
-void ReturnResultsPath(char        *path,
-		       DPSK_SHARED *call_ID);
-*/
+void InitGlobalVars(char *buffer, int position, MPI_Comm communicator);
+	    
+void ReturnResultsPath(char *path, MPI_Comm communicator);
 void DumpMemory();
 void WriteLowerBound();
+
+
+ pthread_mutex_t mutex;
+ pthread_mutexattr_t attr_mutex;
+
 
 /* Argumentos passados para as threads de execucao */
 typedef struct
@@ -81,7 +85,7 @@ typedef struct
 
 /* Variaveis globais para o serverMD */
 char stop_ateam = FALSE;
-double time_out   = TimeWaiting;
+double time_out = TimeWaiting;
 
 /* Thread de execução do serverMD - Trata das requisicoes dos agentes */
 void *threadServerMD (void * argsStruct) {
@@ -90,26 +94,32 @@ void *threadServerMD (void * argsStruct) {
   char * arg1;
   char * arg2;
   char *portMD;
-  int insize = 0;
+  int insize          = 0;
   int flagAgentAction = 1;
-  int    method     = 0;
-  int position = 0;
+  int method          = 0;
+  int position        = 0;
   MPI_Status status;   
   ThreadParam  * threadParamStruct;
   
   /* Obtendo os parametros recebidos */    
   threadParamStruct = (ThreadParam *) argsStruct;
   MPI_Comm newCommClient = (MPI_Comm ) (threadParamStruct->communicator);
-  arg1 = (char *)threadParamStruct->path1;
+  //arg1 = (char *)threadParamStruct->path1;
   arg2 = (char *)threadParamStruct->path2;
   portMD = (char *)threadParamStruct->port;
   
+  
+  //printf("argumento %s\n", arg1);
+  //printf("argumento %s\n", arg2);
+  
   /* Laco para tratar a requisicao do agentes */   
   while(flagAgentAction){
+    
     /* Recebendo os dados empacotados */
 	MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, newCommClient, &status);
 	MPI_Get_count(&status, MPI_PACKED, &insize);
-		 
+	
+	//printf("\n server md size %d", insize);	 
 	buffer = malloc(insize);
 	MPI_Recv(buffer, insize, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, 
 		                                         newCommClient, &status);
@@ -122,10 +132,9 @@ void *threadServerMD (void * argsStruct) {
 	  { case REQUEST_SOLUTION :
 		 { if (nb_dual_sol_mem > 0)
 		     RequestDualSolution(stop_ateam, buffer, insize, position, newCommClient);
-			 /*else
-			 RequestEmptyMemory(&stop_ateam,call_ID);
-			  */   
-		     break;
+		   else
+			 RequestEmptyMemory(&stop_ateam, newCommClient);
+		   break;
 		  }
 		  case AGENT_SEND_SOLUTION :
 		   {   
@@ -140,8 +149,8 @@ void *threadServerMD (void * argsStruct) {
 		   {  
 		  	 if (nb_cuts_mem > 0)
 			   RequestCutsofSol(stop_ateam, buffer, insize, position, newCommClient);
-			 // else
-		     //     RequestEmptyMemory(&stop_ateam,call_ID);
+			 else
+		       RequestEmptyMemory(&stop_ateam, newCommClient);
 			 break;
 		   }
 		  case AGENT_SEND_CUTS :
@@ -154,8 +163,7 @@ void *threadServerMD (void * argsStruct) {
 		   }
 		  case INIT_GLOBAL_VARS :
 		   { InitGlobalVars(buffer, position, newCommClient);
-			 OpenFileStatistics("/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/teste/");
-				   //printf("\n ==== Argumento %s\n", *arg2);
+			 OpenFileStatistics(arg2);
 			 break;
 		   }
 		  case DUMP_MEMORY :
@@ -168,7 +176,7 @@ void *threadServerMD (void * argsStruct) {
 		     break;
 		   }
 		  case GET_RESULTS_PATH :
-		   { //ReturnResultsPath(argv[2],call_ID);
+		   { ReturnResultsPath(arg2, newCommClient);
 			 break;
 		   }
 		  case STOP_SERVER :
@@ -210,14 +218,12 @@ main(int argc, char *argv[])
  int size, rank;
  int provided;
  
+ 
+ 
  MPI_Init_thread(NULL, NULL, MPI_THREAD_MULTIPLE, &provided );
  MPI_Comm_size(MPI_COMM_WORLD, &size);
  MPI_Comm_rank(MPI_COMM_WORLD, &rank);	
   										
- int    method     = 0;	         
- char * buffer;		             
- int position = 0;	                 					          
- MPI_Status status;
  char server_name[256];             
  char portMD[MPI_MAX_PORT_NAME];    
  
@@ -240,12 +246,10 @@ main(int argc, char *argv[])
  srand48(time(0)); /* Dúvida: saber exatamente o que faz */
   
  /* Le os valores dos parametros do ATeam e inicia a estrutura da tabela de
-    "hash" que sera a memoria de cortes. */
- InitParamHashTable(); /* Localizada em dualrot.c */
+    "hash" que sera a memoria de cortes.                                      */
+ InitParamHashTable();                             /* Localizada em dualrot.c */
 
- int flagAgentAction = 0;
- int insize = 0;
- pthread_t threads[10];
+ pthread_t threads[100];
  int t =0;
  int rc;
 
@@ -255,8 +259,15 @@ main(int argc, char *argv[])
 
  pthread_attr_init(&attr);
  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+ 
+ 
 
+ 
+ pthread_mutexattr_init(&attr_mutex);
+ pthread_mutexattr_setprotocol(&attr_mutex, 0);
+ pthread_mutex_init(&mutex, &attr_mutex);
  /* Inicio do loop "infinito" de execucao do servidor */
+
  while (time_out > 10)
  {  
    printf ("\n Servidor MD a espera de Conexão \n");
@@ -267,8 +278,9 @@ main(int argc, char *argv[])
             
    listParam = malloc(sizeof(ThreadParam));       
    listParam->communicator = *newCommClient;
-   listParam->path1 = argv[2];
-   listParam->path2 = argv[4];
+   listParam->path2 = argv[1];
+   //listParam->path1 = argv[2];
+   //listParam->path2 = argv[4];
    listParam->port = portMD;
     
    /* Criando a thread para tratar a requisicao do agente conectado */
@@ -289,9 +301,13 @@ main(int argc, char *argv[])
 
   printf("\n\n * Servidor de memoria de solucoes duais finalizado ... * \n\n");
   
+  
+     
+  MPI_Unpublish_name(server_name, MPI_INFO_NULL, portMD);
   MPI_Finalize();
-  printf("* Melhor limite inferior obtido = %f. *\n",
-  DualMem[nb_dual_sol_mem-1].value);
+  if(pthread_mutex_destroy(&mutex) != 0)
+     perror("mutex destroy");
+  printf("* Melhor limite inferior obtido = %f. *\n", DualMem[nb_dual_sol_mem-1].value);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -316,10 +332,10 @@ void RequestDualSolution(char         stop_ateam,
    { 
      MPI_Unpack(buffer, sizeBuffer, &position, &probab, 1, MPI_INT, communicator); 
      MPI_Unpack(buffer, sizeBuffer, &position, &requester, 1, MPI_UNSIGNED, communicator);
-     pos    = ChoosePosition(probab,nb_dual_sol_mem); 
-     do
-       pos  = ChoosePosition(probab,nb_dual_sol_mem);
-     while (DualMem[pos].agent[requester]);
+     pos    = ChoosePosition(probab, nb_dual_sol_mem); 
+     do{
+       pos  = ChoosePosition(probab, nb_dual_sol_mem);
+     }while (DualMem[pos].agent[requester]);
    }
    
   /* Empacotamento da solucao a ser enviada ao agente que a requisitou */
@@ -328,12 +344,12 @@ void RequestDualSolution(char         stop_ateam,
  
  sizeMessage = (2 * sizeof(char)) + (TotalAgents * sizeof(char)) + 	
                sizeof(int) + sizeof(long) + sizeof(double) + (nb_col * sizeof(double)) +
-               ((nb_lin + DualMem[pos].nb_cuts) * sizeof(double)) + 
+               ((nb_lin + CutsofSol) * sizeof(double)) + 
                sizeof(unsigned int);  			    
  
  if(DualMem[pos].nb_cuts > 0)
- 	sizeMessage = sizeMessage + (DualMem[pos].nb_cuts * sizeof(int));
- 	
+ 	//sizeMessage = sizeMessage + (DualMem[pos].nb_cuts * sizeof(int));
+ 	sizeMessage = sizeMessage + ( CutsofSol * sizeof(int));
  bufferSend = malloc(sizeMessage);
    
  MPI_Pack(&stop_ateam, 1, MPI_CHAR, bufferSend, sizeMessage, &positionSend, communicator);
@@ -343,7 +359,6 @@ void RequestDualSolution(char         stop_ateam,
  
  if (DualMem[pos].nb_cuts > 0){
       MPI_Pack(DualMem[pos].cut, CutsofSol, MPI_INT, bufferSend, sizeMessage, &positionSend, communicator);
-   //   printf("\n Servidor var_u %d \n\n",DualMem[pos].cut);
  }
  
  MPI_Pack(&DualMem[pos].proc_time, 1, MPI_LONG, bufferSend, sizeMessage, &positionSend, communicator); 
@@ -351,16 +366,15 @@ void RequestDualSolution(char         stop_ateam,
  
  MPI_Pack(DualMem[pos].red_cost, nb_col, MPI_DOUBLE, bufferSend, sizeMessage, &positionSend, communicator);
  
+ 
  int sizeVar_u = 0;
- sizeVar_u = nb_lin + DualMem[pos].nb_cuts;
+ //sizeVar_u = nb_lin + DualMem[pos].nb_cuts;
+ sizeVar_u = nb_lin + CutsofSol;
  
  MPI_Pack(DualMem[pos].var_u, sizeVar_u, MPI_DOUBLE, bufferSend, sizeMessage, &positionSend, communicator);
  MPI_Pack(&DualMem[pos].agent_ID, 1, MPI_UNSIGNED, bufferSend, sizeMessage, &positionSend, communicator);
  
- MPI_Send(bufferSend, positionSend, MPI_PACKED, 0, 1, communicator);
- 
- //printf("\n === serverMD: sizeMessage %d \n", sizeMessage); 
- //printf("==== Fim RequestDualSolution \n\n");  
+ MPI_Send(bufferSend, positionSend, MPI_PACKED, 0, 1, communicator); 
 
 }
 
@@ -378,36 +392,16 @@ void AgentSendDualSolution(char *stop_ateam, char * buffer, int sizeBuffer,
   void         *values      = NULL;
   
   
-  size             = nb_lin + CutsofSol;
+  size = nb_lin + CutsofSol;
   
   DualSol.var_u    = (double *) malloc(size * sizeof(double));
   DualSol.red_cost = (double *) malloc(nb_col * sizeof(double));
   DualSol.cut = (int *) malloc(CutsofSol * sizeof(int));
   
-  //printf("\n\n Iniciando desempacotamento \n\n");
+  
   
   MPI_Unpack(buffer, sizeBuffer, &position, &stop_aux, 1, MPI_CHAR, communicator);
   *stop_ateam = (*stop_ateam || stop_aux);
-  
-  /*
-   
-   *  pvm_upkint(&tid_agente,1,1);
-   pvm_upkstr(&stop_aux);
-   *stop_ateam = (*stop_ateam || stop_aux);
-   pvm_upkdouble(&DualSol.value,1,1);
-   pvm_upkdouble(DualSol.red_cost,nb_col,1);
-   pvm_upkdouble(DualSol.var_u,nb_lin,1);
-   pvm_upkuint(&DualSol.agent_ID,1,1);
-   pvm_upkstr(&DualSol.improved_sol);
-   pvm_upkbyte(DualSol.agent,TotalAgents,1);
-   pvm_upkint(&DualSol.nb_cuts,1,1);
-   if (DualSol.nb_cuts > 0)
-   {
-      pvm_upkint(DualSol.cut,CutsofSol,1);
-   }
-   pvm_upklong(&DualSol.proc_time,1,1);
-   * */
-  
   
   MPI_Unpack(buffer, sizeBuffer, &position, &DualSol.value, 1, MPI_DOUBLE, communicator);
   MPI_Unpack(buffer, sizeBuffer, &position, DualSol.red_cost, nb_col, MPI_DOUBLE, communicator);
@@ -417,6 +411,7 @@ void AgentSendDualSolution(char *stop_ateam, char * buffer, int sizeBuffer,
   MPI_Unpack(buffer, sizeBuffer, &position, DualSol.agent, TotalAgents, MPI_CHAR, communicator);
   MPI_Unpack(buffer, sizeBuffer, &position, &DualSol.nb_cuts, 1, MPI_INT, communicator);
   
+  //printf("\n cut %d", DualSol.nb_cuts);
   if (DualSol.nb_cuts > 0)
    { 
        MPI_Unpack(buffer, sizeBuffer, &position, DualSol.cut, CutsofSol, MPI_INT, communicator);
@@ -424,9 +419,10 @@ void AgentSendDualSolution(char *stop_ateam, char * buffer, int sizeBuffer,
   
   MPI_Unpack(buffer, sizeBuffer, &position, &DualSol.proc_time, 1, MPI_LONG, communicator);
    
-  //printf("\n\n Fim desempacotamento - insertDualMem\n\n");
   //  Insercao na memoria da solucao enviada pelo agente 
+  pthread_mutex_lock(&mutex);
   InsertDualMem(&sleep_ag,&new_problem,&DualSol); //localizada em dualRot.c 
+  pthread_mutex_unlock(&mutex);
 
   // Servidor retorna ao agente indicativo de finalizacao ou nao do agente 
   char * bufferConfirm;
@@ -442,8 +438,6 @@ void AgentSendDualSolution(char *stop_ateam, char * buffer, int sizeBuffer,
   MPI_Send(bufferConfirm, positionConfirm, MPI_PACKED, 0, 1, communicator);
 
   free(bufferConfirm);
-  //rintf("\n\n Fim SendDual \n\n");
-  
   
 }
 
@@ -497,28 +491,12 @@ void RequestCutsofSol(char      stop_ateam,
 		              int       sizeOfBuffer, 
 		              int       position, 
 		              MPI_Comm  communicator)
-{
+{ /*
   short       *cut_set     = NULL;
   int          i           = 0,
                nb_cuts     = 0,
               *cut         = NULL;
   CutType     *cut_of_sol  = NULL;
- /* DPSK_SLOT    RRec1("NCuts"),
-               RRec2("Cut"),
-              *Rec0        = NULL,
-              *Rec1        = NULL,
-              *Rec2        = NULL,
-              *aux         = NULL;
-  DPSK_OBJECT *ReturnParam = NULL;
- */
-
-  // Desempacotamento da requisicao de cortes enviada pelo agente 
- /* aux     = MethodParam -> GetSlot(&RRec1);
-  nb_cuts = *(int *)(aux->GetValue());
-  aux     = MethodParam -> GetSlot(&RRec2);
-  cut     = (int *)(aux->GetValue());
-  delete(aux);
- */
 
   MPI_Unpack(buffer, sizeOfBuffer, &position, &nb_cuts, 1, MPI_INT, communicator); 
   MPI_Unpack(buffer, sizeOfBuffer, &position, cut, 1, MPI_INT, communicator); 
@@ -542,7 +520,7 @@ void RequestCutsofSol(char      stop_ateam,
   
   bufferSend = malloc(sizeMessage);
   
-  MPI_Pack(&stop_ateam, 1, MPI_INT, bufferSend, sizeMessage, &positionSend, communicator);
+  MPI_Pack(&stop_ateam, 1, MPI_CHAR, bufferSend, sizeMessage, &positionSend, communicator);
   MPI_Pack(&cut_of_sol->used, 1, MPI_CHAR, bufferSend, sizeMessage, &positionSend, communicator);
   MPI_Pack(&cut_of_sol->chosen, 1, MPI_CHAR, bufferSend, sizeMessage, &positionSend, communicator);
   MPI_Pack(&cut_of_sol->rhs, 1, MPI_SHORT, bufferSend, sizeMessage, &positionSend, communicator);
@@ -551,38 +529,15 @@ void RequestCutsofSol(char      stop_ateam,
   MPI_Pack(&cut_of_sol->tab_pos, 1, MPI_INT, bufferSend, sizeMessage, &positionSend, communicator);
   MPI_Pack(&cut_of_sol->nb_sol, 1, MPI_INT, bufferSend, sizeMessage, &positionSend, communicator);
   MPI_Pack(&cut_of_sol->next, 1, MPI_INT, bufferSend, sizeMessage, &positionSend, communicator);
-  MPI_Pack(&cut_of_sol->key, 1, MPI_INT, bufferSend, sizeMessage, &positionSend, communicator);
+  MPI_Pack(&cut_of_sol->key, 1, MPI_LONG, bufferSend, sizeMessage, &positionSend, communicator);
   MPI_Pack(cut_set, CutsofSol * nb_col, MPI_SHORT, bufferSend, sizeMessage, &positionSend, communicator);
   
   MPI_Send(bufferSend, positionSend, MPI_PACKED, 0, 1, communicator); 
-
-  /*
-   * { char   used,
-         chosen;
-  short  rhs,
-        *coef;
-  int    col_cut,
-         tab_pos,
-         nb_sol,
-         next;
-  long   key;
-} CutType;
-  Rec0 = new DPSK_SLOT("Stop",(void *)(&stop_ateam),sizeof(char));
-  Rec1 = new DPSK_SLOT("Cut",(void *)(cut_of_sol),CutsofSol * sizeof(CutType));
-  Rec2 = new DPSK_SLOT("Coef",(void *)(cut_set), CutsofSol * nb_col * sizeof(short));
-  ReturnParam = new DPSK_OBJECT("ReturnParam",Rec0,Rec1,Rec2,NULL);
-
-  call_ID -> ReturnMethod(ReturnParam);
-  delete(ReturnParam);
-  delete(Rec0);
-  delete(Rec1);
-  delete(Rec2);
-  free(cut_set);
-  free(cut_of_sol);*/
   
   free(bufferSend);
   free(cut_set);
   free(cut_of_sol);
+  */ 
 }
 
 /* ------------------------------------------------------------------------- */
@@ -645,23 +600,23 @@ void AgentSendCuts(char         stop_ateam,
 }
 */
 /* ------------------------------------------------------------------------- */
-/*
-void RequestEmptyMemory(char        *stop_ateam,
-			DPSK_SHARED *call_ID)
-{
-  DPSK_SLOT   *ReturnStop  = NULL;
-  DPSK_OBJECT *ReturnParam = NULL;
 
+void RequestEmptyMemory(char *stop_ateam, MPI_Comm communicator)
+{
   // Servidor sinaliza ao agente para finalizar, pois a memoria esta vazia
   *stop_ateam = TRUE;
+    
+  char * buffer;
+  int position = 0;
+  buffer = malloc(sizeof(char));
+ 
+  MPI_Pack(&stop_ateam, 1, MPI_CHAR, buffer, sizeof(char), &position, communicator);
+  MPI_Send(buffer, position, MPI_PACKED, 0, 1, communicator); 
+  
+  free(buffer);
 
-  ReturnStop  = new DPSK_SLOT("Stop",(void *)(stop_ateam),sizeof(char));
-  ReturnParam = new DPSK_OBJECT("ReturnParam",ReturnStop,NULL);
-  call_ID -> ReturnMethod(ReturnParam);
-  delete(ReturnParam);
-  delete(ReturnStop);
+  
 }
-*/
 /* ------------------------------------------------------------------------- */
 
 void InitGlobalVars(char *buffer, int position, MPI_Comm communicator)
@@ -682,25 +637,23 @@ void InitGlobalVars(char *buffer, int position, MPI_Comm communicator)
 }
 
 /* ------------------------------------------------------------------------- */
-/*
-void ReturnResultsPath(char        *path,
-		       DPSK_SHARED *call_ID)
+void ReturnResultsPath(char *path, MPI_Comm communicator)
 {
-  int          path_len    = 0;
-  DPSK_SLOT   *ReturnPath  = NULL,
-              *ReturnLen   = NULL;
-  DPSK_OBJECT *ReturnParam = NULL;
-
+  int  path_len    = 0;
+  char * message;
+  int  position = 0;
+  
   path_len    = (int) strlen(path);
-  ReturnPath  = new DPSK_SLOT("Path",(void *)(path),path_len);
-  ReturnLen   = new DPSK_SLOT("PathLen",(void *)&path_len,sizeof(int));
-  ReturnParam = new DPSK_OBJECT("ReturnParam",ReturnLen,ReturnPath,NULL);
-  call_ID -> ReturnMethod(ReturnParam);
-  delete(ReturnParam);
-  delete(ReturnPath);
-  delete(ReturnLen);
+  message = malloc((path_len * sizeof(char)) + sizeof(int));
+  
+  
+  MPI_Pack(&path_len, 1, MPI_INT, message, ((path_len * sizeof(char)) + sizeof(int)), &position, communicator);
+  MPI_Pack(path, path_len, MPI_CHAR, message, ((path_len * sizeof(char)) + sizeof(int)), &position, communicator);
+  
+  
+  MPI_Send(message, position, MPI_PACKED, 0, 1, communicator);
+ 
 }
-*/
 /* ------------------------------------------------------------------------- */
 
 void DumpMemory()
@@ -709,7 +662,6 @@ void DumpMemory()
   struct tm      day;
   struct timeval now;
 
-//HHHH  gettimeofday(&now);
   gettimeofday(&now,NULL);
   day = *localtime(&(now.tv_sec));
 

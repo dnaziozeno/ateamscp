@@ -37,8 +37,6 @@
    dor em que esta executando o 'ns'.
    ------------------------------------------------------------------------- */
    
-#include <mpi.h>
-
 main(int argc,char *argv[])
 {
   int size,          
@@ -81,7 +79,7 @@ main(int argc,char *argv[])
    	MPI_Comm_connect(portMP, MPI_INFO_NULL, 0, MPI_COMM_SELF, &commServerMP);
     MPI_Pack(&method, 1, MPI_INT, bufferMP, 100, &position, commServerMP);
     MPI_Send(bufferMP, position, MPI_PACKED, 0, 1, commServerMP);
-    MPI_Send(&message, 1, MPI_INT, 0, 1, commServerMD);
+    MPI_Send(&message, 1, MPI_INT, 0, 1, commServerMP);
     MPI_Comm_disconnect(&commServerMP);
   }
   

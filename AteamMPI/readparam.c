@@ -37,7 +37,7 @@ int ReadAteamParam(int param)
         i      = 0;
   FILE *fparam = NULL;
 
-  fparam = fopen("/home/naziozeno/Documents/projeto-final/AteamSCP/AteamGUI/src/ateamparam","r");
+  fparam = fopen("../ateamparam","r");
   for (i = 0; i < (8 + param); i++)
     fgets(lines,100,fparam);
   fscanf(fparam,"%i",&value);

@@ -316,7 +316,9 @@ void InitParamHashTable()
   MaxSolDualAg  = (float) (ReadAteamParam(21) / 100);
 
   DualMem = (DualType *) malloc(MaxLenDualMem * sizeof(DualType));
+  memset( DualMem, 0, MaxLenDualMem * sizeof(DualType));
   CutMem  = (CutType *) malloc(MaxLenCutMem * sizeof(CutType));
+  memset( CutMem, 0, MaxLenCutMem * sizeof(CutType));
   first_free  = LenHashTab;
   for (i = 0; i < LenHashTab; i++)
     CutMem[i] = (CutType) {FALSE,FALSE,0,NULL,0,i,-1,-1,0};
