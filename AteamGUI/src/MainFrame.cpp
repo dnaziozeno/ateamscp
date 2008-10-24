@@ -33,7 +33,7 @@
 Graph *frame = (Graph *) NULL;
 wxTreeItemId root_id;
 
-wxTreeItemId agents_tree_id[6];
+wxTreeItemId agents_tree_id[8];
 
 wxChartCtrl *statistics_chart;
 wxChartPoints *statistics_3D_bar;
@@ -44,8 +44,8 @@ AteamParam *ateam_param_main_frame;
 
 InitMemories *init_memories;
 
-int nagents[6];
-float pagents[6];
+int nagents[8];
+float pagents[8];
 
 extern MPI_Comm comm_three_opt;
 
@@ -80,8 +80,8 @@ MainFrame::MainFrame(
     team_tree_ctrl = new wxTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
     team_tree_ctrl->SetWindowStyle(wxTR_HAS_BUTTONS|wxSUNKEN_BORDER);
 
-    nagents[0] = nagents[1] = nagents[2] = nagents[3] = nagents[4] = nagents[5] = 0;
-    pagents[0] = pagents[1] = pagents[2] = pagents[3] = pagents[4] = pagents[5] = 0.0;
+    nagents[0] = nagents[1] = nagents[2] = nagents[3] = nagents[4] = nagents[5] = nagents[6] = nagents[7] = 0;
+    pagents[0] = pagents[1] = pagents[2] = pagents[3] = pagents[4] = pagents[5] = pagents[6] = pagents[7] = 0.0;
 
     set_properties();
     do_layout();
@@ -126,8 +126,8 @@ void MainFrame::set_properties()
     statistics_3D_bar->Add( wxT("LS"), 3, 0);
     statistics_3D_bar->Add( wxT("PERT"), 4, 0);
     statistics_3D_bar->Add( wxT("CONS"), 5, 0);
-statistics_3D_bar->Add( wxT("CONS"), 6, 0);
-statistics_3D_bar->Add( wxT("CONS"), 7, 0);
+    statistics_3D_bar->Add( wxT("PRIMAL"), 6, 0);
+    statistics_3D_bar->Add( wxT("DUAL"), 7, 0);
 
     statistics_chart = new wxChartCtrl(
         this, -1, (STYLE)(USE_AXIS_X|USE_AXIS_Y|USE_GRID),
@@ -192,7 +192,7 @@ void MainFrame::onStopClick(wxCommandEvent &event)
     wxTreeItemId current_agent_item_id;
     MyTreeItemData *current_agent_item_data;
 
-    for (int agent = THREE_OPT; agent <= CONS; agent++)
+    for (int agent = THREE_OPT; agent <= DUAL; agent++)
     {
         while (team_tree_ctrl->ItemHasChildren(agents_tree_id[agent]))
         {
@@ -202,11 +202,6 @@ void MainFrame::onStopClick(wxCommandEvent &event)
             team_tree_ctrl->Delete(current_agent_item_id);
         }
     }
-
-    //nagents[0] = nagents[1] = nagents[2] = nagents[3] = nagents[4] = nagents[5] = 0;
-    //pagents[0] = pagents[1] = pagents[2] = pagents[3] = pagents[4] = pagents[5] = 0.0;
-
-    //refresh_statistics();
 
     MPI_Comm interComSpawn1, interComSpawn2, interComSpawn3;
     int errcodes[1];
@@ -312,6 +307,8 @@ void MainFrame::onApplyClick()
     agents_tree_id[LS] = team_tree_ctrl->AppendItem(root_id, _T("3-LS (0.00%)"), -1, -1, NULL);
     agents_tree_id[PERT] = team_tree_ctrl->AppendItem(root_id, _T("4-PERT (0.00%)"), -1, -1, NULL);
     agents_tree_id[CONS] = team_tree_ctrl->AppendItem(root_id, _T("5-CONS (0.00%)"), -1, -1, NULL);
+    agents_tree_id[PRIMAL] = team_tree_ctrl->AppendItem(root_id, _T("6-PRIMAL (0.00%)"), -1, -1, NULL);
+    agents_tree_id[DUAL] = team_tree_ctrl->AppendItem(root_id, _T("7-DUAL (0.00%)"), -1, -1, NULL);
 
     team_tree_ctrl->ExpandAll();
     team_tree_ctrl->SortChildren(root_id);
@@ -364,6 +361,16 @@ void MainFrame::onAddAgent(int type, wxString ip, MPI_Comm *mpi_ref, int *params
             team_tree_ctrl->AppendItem(agents_tree_id[CONS], ip + _("-") + getTime(), -1, -1, data);
             nagents[CONS]++;
         break;
+
+        case PRIMAL:
+            team_tree_ctrl->AppendItem(agents_tree_id[PRIMAL], ip + _("-") + getTime(), -1, -1, data);
+            nagents[PRIMAL]++;
+        break;
+
+        case DUAL:
+            team_tree_ctrl->AppendItem(agents_tree_id[DUAL], ip + _("-") + getTime(), -1, -1, data);
+            nagents[DUAL]++;
+        break;
     }
 
     nagents[0]++;
@@ -385,9 +392,10 @@ void MainFrame::onRemoveAgent(int type, MPI_Comm *mpi_ref)
 
     change[0] = 'S';
     MPI_Pack(change, 1, MPI_CHAR, buffer, size, &position, *mpi_ref);
-    MPI_Send(change, 1, MPI_CHAR, 0, 1, *mpi_ref); 
-
+    MPI_Send(change, 1, MPI_CHAR, 0, 1, *mpi_ref);
     free(buffer);
+
+    MPI_Comm_disconnect(mpi_ref);
 
     switch (type)
     {
@@ -410,6 +418,14 @@ void MainFrame::onRemoveAgent(int type, MPI_Comm *mpi_ref)
         case CONS:
             nagents[CONS]--;
         break;
+
+        case PRIMAL:
+            nagents[PRIMAL]--;
+        break;
+
+        case DUAL:
+            nagents[DUAL]--;
+        break;
     }
 
     nagents[0]--;
@@ -428,7 +444,7 @@ void MainFrame::refresh_statistics()
     /* Calcula a porcentagem de cada agente presente no time. */
     if (nagents[0] == 0)
     {
-        pagents[1] = pagents[2] = pagents[3] = pagents[4] = pagents[5] = 0.0;
+        pagents[1] = pagents[2] = pagents[3] = pagents[4] = pagents[5] = pagents[6] = pagents[7] = 0.0;
     }
     else
     {
@@ -437,6 +453,8 @@ void MainFrame::refresh_statistics()
         pagents[3] = ((float)nagents[3]/(float)nagents[0]) * 100;
         pagents[4] = ((float)nagents[4]/(float)nagents[0]) * 100;
         pagents[5] = ((float)nagents[5]/(float)nagents[0]) * 100;
+        pagents[6] = ((float)nagents[6]/(float)nagents[0]) * 100;
+        pagents[7] = ((float)nagents[7]/(float)nagents[0]) * 100;
     }
 
     /* Cria o objeto que gerencia o grafico de barras. */
@@ -448,8 +466,8 @@ void MainFrame::refresh_statistics()
     statistics_3D_bar->Add( wxT("LS"), 3, pagents[3]);
     statistics_3D_bar->Add( wxT("PERT"), 4, pagents[4]);
     statistics_3D_bar->Add( wxT("CONS"), 5, pagents[5]);
-statistics_3D_bar->Add( wxT("CONS"), 6, pagents[5]);
-statistics_3D_bar->Add( wxT("CONS"), 7, pagents[5]);
+    statistics_3D_bar->Add( wxT("PRIMAL"), 6, pagents[6]);
+    statistics_3D_bar->Add( wxT("DUAL"), 7, pagents[7]);
 
     /* Cria o objeto que apresenta visualmente o gráfico */
     statistics_chart = new wxChartCtrl(
@@ -470,6 +488,8 @@ statistics_3D_bar->Add( wxT("CONS"), 7, pagents[5]);
     team_tree_ctrl->SetItemText(agents_tree_id[LS], _T("3-LS (") + wxString::Format(wxT("%.2f%)"), pagents[LS]));
     team_tree_ctrl->SetItemText(agents_tree_id[PERT], _T("4-PERT (") + wxString::Format(wxT("%.2f%)"), pagents[PERT]));
     team_tree_ctrl->SetItemText(agents_tree_id[CONS], _T("5-CONS (") + wxString::Format(wxT("%.2f%)"), pagents[CONS]));
+    team_tree_ctrl->SetItemText(agents_tree_id[PRIMAL], _T("6-PRIMAL (") + wxString::Format(wxT("%.2f%)"), pagents[PRIMAL]));
+    team_tree_ctrl->SetItemText(agents_tree_id[DUAL], _T("7-DUAL (") + wxString::Format(wxT("%.2f%)"), pagents[DUAL]));
 }
 
 /* ------------------------------------------------------------------------------------- */

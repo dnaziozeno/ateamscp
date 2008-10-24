@@ -199,6 +199,7 @@ void *threadServerMD (void * argsStruct) {
    
   MPI_Close_port(portMD);
   MPI_Comm_disconnect(&newCommClient);
+  free(threadParamStruct);
   printf ("\n\n === FIM THREAD!!!\n\n");
   pthread_exit(NULL);
 
@@ -299,7 +300,6 @@ main(int argc, char *argv[])
   fclose(fstts);
   fclose(fdump);
 
-  printf("\n\n * Servidor de memoria de solucoes duais finalizado ... * \n\n");
   
   
      
@@ -307,6 +307,7 @@ main(int argc, char *argv[])
   MPI_Finalize();
   if(pthread_mutex_destroy(&mutex) != 0)
      perror("mutex destroy");
+  printf("\n\n * Servidor de memoria de solucoes duais finalizado ... * \n\n");
   printf("* Melhor limite inferior obtido = %f. *\n", DualMem[nb_dual_sol_mem-1].value);
 }
 
@@ -376,6 +377,7 @@ void RequestDualSolution(char         stop_ateam,
  
  MPI_Send(bufferSend, positionSend, MPI_PACKED, 0, 1, communicator); 
 
+ free(bufferSend);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -652,6 +654,8 @@ void ReturnResultsPath(char *path, MPI_Comm communicator)
   
   
   MPI_Send(message, position, MPI_PACKED, 0, 1, communicator);
+  
+  free(message);
  
 }
 /* ------------------------------------------------------------------------- */

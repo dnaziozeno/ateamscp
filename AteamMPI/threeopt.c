@@ -73,8 +73,8 @@ void ThreeOpt(DualType *DualSol)
          i3    = 0;
   double delta = 0;
 
-printf("\n\ncut = %i",DualSol->nb_cuts);
-printf("\ngrd = %f",DualSol->value);
+//printf("\n\ncut = %i",DualSol->nb_cuts);
+//printf("\ngrd = %f",DualSol->value);
   CalcDisjunctionSize(DualSol);
   while (exec)
    { exec = FALSE;
@@ -105,7 +105,7 @@ printf("\ngrd = %f",DualSol->value);
 	loop = TRUE;
       }
    }
-printf("\n3op = %f\n",DualSol->value);
+//printf("\n3op = %f\n",DualSol->value);
 
   DualSol->improved_sol         = TRUE;
   DualSol->agent[agent_dual]    = FALSE;

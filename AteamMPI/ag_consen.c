@@ -32,6 +32,9 @@ int    *U_x      = NULL,
        *unsat    = NULL,
        *cardin   = NULL,
        *sets     = NULL;
+
+MPI_Comm interfaceComm;
+
 double *aux_cost = NULL;
 
 void ExecAgConsen(MPI_Comm communicatorMD, MPI_Comm communicatorMP);
@@ -47,18 +50,12 @@ void ExecAgConsen(MPI_Comm communicatorMD, MPI_Comm communicatorMP);
    ------------------------------------------------------------------------- */
 main(int argc, char *argv[])
 {
-  int size,          
-      rank,	
-	  flagConnectMP = 1,
-	  flagConnectMD = 1;		  
+  int flagConnectMP = 1, flagConnectMD = 1;
   char portMD[MPI_MAX_PORT_NAME],
        portMP[MPI_MAX_PORT_NAME];
        
-  MPI_Comm commServerMD, interfaceComm, commServerMP;          
-  	            				            
-  MPI_Init(&argc, &argv);               
-  MPI_Comm_size(MPI_COMM_WORLD, &size); 
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank); 
+  MPI_Comm commServerMD, commServerMP;          
+  MPI_Init(&argc, &argv);
                            
   MPI_Comm_get_parent(&interfaceComm);
                                        
@@ -82,13 +79,22 @@ main(int argc, char *argv[])
     }
   	else
   	{
-		TimeSleeping    = (int)   ReadAteamParam(1);
-		CutsofSol       = (int)   ReadAteamParam(6);
-		MaxExeTime      = (int)   ReadAteamParam(11);
-		RandomConsensus = (char)  ReadAteamParam(15);
-		RestrValue      = (float) (ReadAteamParam(18) / 100.0);
-		if (!(finput = fopen(argv[2],"r")))
-		{ printf("\n\n* Erro na abertura do arquivo %s. *\n",argv[2]);
+/*
+        TimeSleeping    = (int)   ReadAteamParam(1);
+        CutsofSol       = (int)   ReadAteamParam(6);
+        MaxExeTime      = (int)   ReadAteamParam(11);
+        RandomConsensus = (char)  ReadAteamParam(15);
+        RestrValue      = (float) (ReadAteamParam(18) / 100.0);
+*/
+
+        TimeSleeping    = atoi(argv[2]);
+        CutsofSol       = atoi(argv[3]);
+        MaxExeTime      = atoi(argv[4]);
+        RandomConsensus = (char)  atoi(argv[5]);
+        RestrValue      = (float) (atoi(argv[6]) / 100.0);
+
+		if (!(finput = fopen(argv[1],"r")))
+		{ printf("\n\n* Erro na abertura do arquivo %s. *\n",argv[1]);
 		   exit(1);
 		}
 		ReadSource();
@@ -110,8 +116,8 @@ main(int argc, char *argv[])
    MPI_Send(&message, 1, MPI_INT, 0, 1, commServerMP);
    
    /* Envia mensagem de Finalizacao para interface */
-   //message = 1;
-   //MPI_Send(&message, 1, MPI_INT, 0, 1, interfaceComm);
+   message = 1;
+   MPI_Send(&message, 1, MPI_INT, 0, 1, interfaceComm);
   
    MPI_Comm_disconnect(&commServerMD);
    MPI_Comm_disconnect(&commServerMP);
@@ -150,9 +156,64 @@ void ExecAgConsen(MPI_Comm communicatorMD, MPI_Comm communicatorMP)
   var_x2   = (int *) malloc(nb_col * sizeof(int));
   var_x3   = (int *) malloc(nb_col * sizeof(int));
 
+  int * bufferInterface;
+  MPI_Request request;
+  MPI_Status status;
+  int count = 0;
+  char change[1];
+  int flag = 0, position = 0;
+  int aux = -1;
+
   GetTimes(FALSE);
   do
-   { if (sleep_ag)
+   {
+    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, interfaceComm, &flag, &status);
+    MPI_Get_count(&status, MPI_PACKED, &count);
+
+    if(flag){
+      
+      bufferInterface = malloc(count);
+      MPI_Recv(bufferInterface, count, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, interfaceComm, &status);
+      MPI_Unpack(bufferInterface, count, &position, &change[0], 1, MPI_CHAR, interfaceComm);
+      
+      if(change[0] == 'S'){
+        return;
+      }
+      
+      else if(change[0] == 'P'){
+     
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);
+	    if(aux != -1)
+	      TimeSleeping = aux;
+	    
+	    aux = -1;
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1)
+          CutsofSol    = aux;
+        
+      aux = -1;
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1)
+          MaxExeTime   = aux;
+      
+      aux = -1;
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1)
+           RandomConsensus = (char) aux;
+
+      aux = -1;
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1)
+           RestrValue      = (float) (aux / 100.0);
+      
+	  }
+	  
+      position = 0;
+      flag = 0;
+      free(bufferInterface);
+    }
+
+    if (sleep_ag)
        sleep(TimeSleeping);
      if (!unicost)
        RequestDualSol(FALSE,&stop,LinearIncr,cut_pos,var_u,red_cost,
@@ -182,12 +243,12 @@ void ExecAgConsen(MPI_Comm communicatorMD, MPI_Comm communicatorMP)
 	        }
 	      }
        }
-      printf("\n consen");
+      //printf("\n consen");
      }
    } while((!stop) && (MaxExeTimeCron()));
 
-  if (!stop)
-    StopAteam(NULL, communicatorMP);
+  //if (!stop)
+    //StopAteam(NULL, communicatorMP);
 
   free(aux_cost);
   free(var_u);

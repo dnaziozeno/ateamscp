@@ -32,6 +32,9 @@ int     *aux_x   = NULL,
         *cover   = NULL,
         *uncover = NULL,
         *tabu    = NULL;
+
+MPI_Comm interfaceComm;
+
 RandInd *set_ind = NULL;
 
 void ExecAgSearch(MPI_Comm communicator);
@@ -47,13 +50,10 @@ void ExecAgSearch(MPI_Comm communicator);
    ------------------------------------------------------------------------- */
 main(int argc, char *argv[])
 {
-  int size,          
-      rank,	
-	  flagConnectMP = 1;
-	  
-  char portMP[MPI_MAX_PORT_NAME];
+    int flagConnectMP = 1;
+    char portMP[MPI_MAX_PORT_NAME];
        
-  MPI_Comm interfaceComm, commServerMP;          
+  MPI_Comm commServerMP;
   	            				            
   MPI_Init(&argc, &argv);               
   MPI_Comm_get_parent(&interfaceComm);
@@ -65,11 +65,13 @@ main(int argc, char *argv[])
   }
   else
   { 
-   	 MPI_Comm_connect(portMP, MPI_INFO_NULL, 0, MPI_COMM_SELF, &commServerMP);
-   	 MaxExeTime     = ReadAteamParam(11);
-     TabuIterations = ReadAteamParam(19);
-     if (!(finput = fopen(argv[2],"r")))
-     { printf("\n\n* Erro na abertura do arquivo %s. *\n",argv[2]);
+     MPI_Comm_connect(portMP, MPI_INFO_NULL, 0, MPI_COMM_SELF, &commServerMP);
+
+     MaxExeTime     = atoi(argv[2]);
+     TabuIterations = atoi(argv[3]);
+
+     if (!(finput = fopen(argv[1],"r")))
+     { printf("\n\n* Erro na abertura do arquivo %s. *\n",argv[1]);
 	   exit(1);
      }
      ReadSource();
@@ -88,8 +90,8 @@ main(int argc, char *argv[])
   MPI_Send(&message, 1, MPI_INT, 0, 1, commServerMP);
    
   /* Envia mensagem de Finalizacao para interface */
-  //message = 1;
-  //MPI_Send(&message, 1, MPI_INT, 0, 1, interfaceComm);
+  message = 1;
+  MPI_Send(&message, 1, MPI_INT, 0, 1, interfaceComm);
  
   MPI_Comm_disconnect(&commServerMP);
   MPI_Finalize();
@@ -120,10 +122,51 @@ void ExecAgSearch(MPI_Comm communicator)
      set_ind[j].sort = lrand48();
    }
 
+  int * bufferInterface;
+  MPI_Request request;
+  MPI_Status status;
+  int count = 0;
+  char change[1];
+  int flag = 0, position = 0;
+  int aux = -1;
+
   GetTimes(FALSE);
   do
 /*  { RequestPrimalSol(FALSE,&stop,LinearIncr,var_x,&PrimalSol,ServMPClass); */
-   { RequestPrimalSol(FALSE,&stop,LinearDecr,var_x,&PrimalSol,communicator);
+   {
+    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, interfaceComm, &flag, &status);
+    MPI_Get_count(&status, MPI_PACKED, &count);
+
+    if(flag){
+      
+      bufferInterface = malloc(count);
+      MPI_Recv(bufferInterface, count, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, interfaceComm, &status);
+      MPI_Unpack(bufferInterface, count, &position, &change[0], 1, MPI_CHAR, interfaceComm);
+      
+      if(change[0] == 'S'){
+        return;
+      }
+      
+      else if(change[0] == 'P'){
+      
+	     MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);
+	     if(aux != -1)
+	      MaxExeTime = aux;
+	    
+	     aux = -1;
+	     MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1){
+          TabuIterations = aux;
+          TabuIterations = ((TabuIterations / 100.) * nb_col);
+        }
+	  }
+	  
+      position = 0;
+      flag = 0;
+      free(bufferInterface);
+    }
+
+    RequestPrimalSol(FALSE,&stop,LinearDecr,var_x,&PrimalSol,communicator);
      if (!stop)
       { Zub = PrimalSol.value;
 	    if (unicost)
@@ -138,12 +181,12 @@ void ExecAgSearch(MPI_Comm communicator)
         for (j = 0; j < nb_col; j++)
           set_ind[j].sort = lrand48();
       
-      printf("\n search");
+      //printf("\n search");
       }
    } while((!stop) && (MaxExeTimeCron()));
 
-  if (!stop)
-    StopAteam(NULL,communicator);
+  //if (!stop)
+    //StopAteam(NULL,communicator);
 
   free(var_x);
   free(cover);

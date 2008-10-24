@@ -36,11 +36,14 @@
 
 #include <mpi.h>
 
+#define ALL 0
 #define THREE_OPT 1
 #define SUBG 2
 #define LS 3
 #define PERT 4
 #define CONS 5
+#define PRIMAL 6
+#define DUAL 7
 
 /* ------------------------------------------------------------------------------------- */
 /* /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/ */

@@ -29,6 +29,10 @@ private:
     void onConfigurePertClick(wxCommandEvent &event);
     void onConsClick(wxCommandEvent &event);
     void onConfigureConsClick(wxCommandEvent &event);
+    void onPrimalClick(wxCommandEvent &event);
+    void onConfigurePrimalClick(wxCommandEvent &event);
+    void onDualClick(wxCommandEvent &event);
+    void onConfigureDualClick(wxCommandEvent &event);
 
 protected:
     wxStatusBar* init_memories_statusbar;
@@ -54,6 +58,12 @@ protected:
     wxButton* cons_button;
     wxComboBox* cons_combo_box;
     wxButton* cons_configure_button;
+    wxButton* primal_button;
+    wxComboBox* primal_combo_box;
+    wxButton* primal_configure_button;
+    wxButton* dual_button;
+    wxComboBox* dual_combo_box;
+    wxButton* dual_configure_button;
 };
 
 #endif

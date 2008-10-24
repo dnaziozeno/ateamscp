@@ -65,11 +65,19 @@ main(int argc, char *argv[])
       fflush(stdout);
   }	 
   else
-   { TimeSleeping = ReadAteamParam(1);
-     CutsofSol    = ReadAteamParam(6);
-     MaxExeTime   = ReadAteamParam(11);
-     if (!(finput = fopen(argv[2],"r")))
-      { printf("\n\n* Erro na abertura do arquivo %s. *\n",argv[2]);
+   {
+/*
+      TimeSleeping = ReadAteamParam(1);
+      CutsofSol    = ReadAteamParam(6);
+      MaxExeTime   = ReadAteamParam(11);
+*/
+
+      TimeSleeping = atoi(argv[2]);
+      CutsofSol    = atoi(argv[3]);
+      MaxExeTime   = atoi(argv[4]);
+
+     if (!(finput = fopen(argv[1],"r")))
+      { printf("\n\n* Erro na abertura do arquivo %s. *\n",argv[1]);
 	    exit(1);
       }
      ReadSource();
@@ -131,7 +139,7 @@ void ExecAg3Opt(MPI_Comm communicator)
   MPI_Status status;
   int count = 0;
   char change[1];
-  int flag = 0, position = 0, *ptr = NULL;
+  int flag = 0, position = 0;
   int aux = -1;
   
     
@@ -198,8 +206,8 @@ void ExecAg3Opt(MPI_Comm communicator)
      //return;
    } while((!stop) && (MaxExeTimeCron()));
    
-  if (!stop)
-    StopAteam(communicator,NULL);
+  //if (!stop)
+    //StopAteam(communicator,NULL);
   
   free(exclude);
   free(cut_pos);

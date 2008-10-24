@@ -560,10 +560,118 @@ void AteamParam::onApplyClick(wxCommandEvent &event)
     //SetStatusText(_("BUTTON APPLY CLICKED..."), 0);
     //status_bar_timer->Start(STATUS_BAR_LIVE);
 
-    edit_data_t->SetParams(interfaceToParams());
-
     //free(*return_params_t);
     //*return_params_t = interfaceToParams();
+
+    edit_data_t->SetParams(interfaceToParams());
+    int type = edit_data_t->GetType();
+    MPI_Comm *comm = edit_data_t->GetComm();
+
+    /* ************************** */
+
+    int sendMsg = 123;
+    MPI_Request request;
+    int position = 0;
+    char * buffer;
+
+    char change[1];
+    change[0] = 'P';
+
+    int *params = interfaceToParams();
+
+    int size;
+    switch (type)
+    {
+        case THREE_OPT:
+            size = ((3 * sizeof(int)) + sizeof(char));
+            buffer = (char *) malloc(size);
+
+            MPI_Pack(change, 1, MPI_CHAR, buffer, size, &position, *comm);
+            MPI_Pack(&params[1], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[6], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[11], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Send(buffer, position, MPI_PACKED, 0, 1, *comm); 
+            free(buffer);
+        break;
+
+        case SUBG:
+            size = ((2 * sizeof(int)) + sizeof(char));
+            buffer = (char *) malloc(size);
+
+            MPI_Pack(change, 1, MPI_CHAR, buffer, size, &position, *comm);
+            MPI_Pack(&params[6], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[11], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Send(buffer, position, MPI_PACKED, 0, 1, *comm); 
+            free(buffer);
+        break;
+
+        case LS:
+            size = ((2 * sizeof(int)) + sizeof(char));
+            buffer = (char *) malloc(size);
+
+            MPI_Pack(change, 1, MPI_CHAR, buffer, size, &position, *comm);
+            MPI_Pack(&params[11], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[19], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Send(buffer, position, MPI_PACKED, 0, 1, *comm); 
+            free(buffer);
+        break;
+
+        case PERT:
+            size = ((4 * sizeof(int)) + sizeof(char));
+            buffer = (char *) malloc(size);
+
+            MPI_Pack(change, 1, MPI_CHAR, buffer, size, &position, *comm);
+            MPI_Pack(&params[1], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[3], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[11], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[8], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Send(buffer, position, MPI_PACKED, 0, 1, *comm); 
+            free(buffer);
+        break;
+
+        case CONS:
+            size = ((5 * sizeof(int)) + sizeof(char));
+            buffer = (char *) malloc(size);
+
+            MPI_Pack(change, 1, MPI_CHAR, buffer, size, &position, *comm);
+            MPI_Pack(&params[1], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[6], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[11], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[15], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[18], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Send(buffer, position, MPI_PACKED, 0, 1, *comm); 
+            free(buffer);
+        break;
+
+        case PRIMAL:
+            size = ((5 * sizeof(int)) + sizeof(char));
+            buffer = (char *) malloc(size);
+
+            MPI_Pack(change, 1, MPI_CHAR, buffer, size, &position, *comm);
+            MPI_Pack(&params[1], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[3], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[6], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[11], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[14], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Send(buffer, position, MPI_PACKED, 0, 1, *comm); 
+            free(buffer);
+        break;
+
+        case DUAL:
+            size = ((6 * sizeof(int)) + sizeof(char));
+            buffer = (char *) malloc(size);
+
+            MPI_Pack(change, 1, MPI_CHAR, buffer, size, &position, *comm);
+            MPI_Pack(&params[1], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[2], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[6], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[11], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[12], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Pack(&params[17], 1, MPI_INT, buffer, size, &position, *comm);
+            MPI_Send(buffer, position, MPI_PACKED, 0, 1, *comm); 
+            free(buffer);
+        break;
+    }
 }
 
 /* ------------------------------------------------------------------------------------- */

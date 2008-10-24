@@ -57,12 +57,6 @@ main(int argc,char *argv[])
       rank;	
 	
 
-  printf("======================================\n");
-  printf("%s\n", argv[0]);
-  printf("%s\n", argv[1]);
-  printf("%s\n", argv[2]);
-  printf("%s\n", argv[3]);
-
   MPI_Init(&argc, &argv);               
   MPI_Comm_size(MPI_COMM_WORLD, &size);   					                     
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);                                         
@@ -72,14 +66,19 @@ main(int argc,char *argv[])
                  path[200];
   unsigned long  NbServerMD   = 0;
                
-  /* ReadAteamParam localizada em readparam.c */	
+/*
   MaxLenDualMem = (int)  ReadAteamParam(2);
   ReducPerc     = (int)  ReadAteamParam(12);
   RandomInitMD  = (char) ReadAteamParam(16);
-  
+*/
+
+  MaxLenDualMem = atoi(argv[3]);
+  ReducPerc     = atoi(argv[4]);
+  RandomInitMD  = (char) atoi(argv[5]);
+
   /* OBS: Esse arquivo de ser passado por argv[2] */
-  if (!(finput = fopen(argv[2],"r")))
-   { printf("\n\n* Erro na abertura do arquivo %s. *",argv[2]);
+  if (!(finput = fopen(argv[1],"r")))
+   { printf("\n\n* Erro na abertura do arquivo %s. *",argv[1]);
      exit(1);
    }
   
@@ -89,15 +88,15 @@ main(int argc,char *argv[])
   Reduction(NULL,NULL); /* Localizada em reduction.c */
   srand48(time(NULL));
 
-  if (argc == 4)
-    strcpy(path,argv[3]);
+  if (argc == 6)
+    strcpy(path,argv[2]);
   else
     strcpy(path,"./");
-  look = argv[2];
+  look = argv[1];
   while (look)
-    if (look = (char *) strstr(argv[2],"/"))
-      argv[2] = (look + 1);
-  strcat(path,argv[2]);
+    if (look = (char *) strstr(argv[1],"/"))
+      argv[1] = (look + 1);
+  strcat(path,argv[1]);
   
   
   

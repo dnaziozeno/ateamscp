@@ -62,26 +62,28 @@ main(int argc,char *argv[])
                path[200];
   u_long       NbServerMP  = 0;
 
-  MaxLenPrimalMem = (int)  ReadAteamParam(3);
-  RandomInitMP    = (char) ReadAteamParam(13);
-  RestrValue      = (float) (ReadAteamParam(18) / 100.0);
-  if (!(finput = fopen(argv[2],"r")))
-   { printf("\n\n* Erro na abertura do arquivo %s. *",argv[2]);
+
+  MaxLenPrimalMem = atoi(argv[3]);
+  RandomInitMP    = (char) atoi(argv[4]);;
+  RestrValue      = (float) (atoi(argv[5]) / 100.0);
+
+  if (!(finput = fopen(argv[1],"r")))
+   { printf("\n\n* Erro na abertura do arquivo %s. *",argv[1]);
      exit(1);
    }
   ReadSource();
   fclose(finput);
   srand48(time(NULL));
 
-  if (argc == 4)
-    strcpy(path,argv[3]);
+  if (argc == 6)
+    strcpy(path,argv[2]);
   else
     strcpy(path,"./");
-  look = argv[2];
+  look = argv[1];
   while (look)
-    if (look = (char *) strstr(argv[2],"/"))
-      argv[2] = (look + 1);
-   strcat(path,argv[2]);
+    if (look = (char *) strstr(argv[1],"/"))
+      argv[1] = (look + 1);
+   strcat(path,argv[1]);
 
   
   char *param = malloc(200 * sizeof(char));
@@ -157,6 +159,7 @@ main(int argc,char *argv[])
         int message = 1224;
   
         MPI_Send(&message, 1, MPI_INT, 0, 1, commServerMP);
+        MPI_Send(&message, 1, MPI_INT, 0, 1, commServerMD);
         
         MPI_Comm_disconnect(&commServerMP);
         MPI_Comm_disconnect(&commServerMD);

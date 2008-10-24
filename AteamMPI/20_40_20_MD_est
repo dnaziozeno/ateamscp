@@ -1,0 +1,26 @@
+O arquivo contem ''fotos'' da memoria de solucoes duais
+Tempo    -> Tempo entre o inicio do A-Team e a foto
+SolDual  -> Valor do melhor solucao dual encontrada
+DProp    -> Nr de sol. duais propostas a memoria
+DAcei    -> Nr de sol. duais prop. e aceitas pela mem
+DIgua    -> Nr de sol. duais prop. nao aceitas iguais
+DPior    -> Nr de sol. duais prop. pior que pior da mem
+DualPior -> Taxa de proposicao de sol. duais piores
+DualAcei -> Taxa de aceitacao das sol. duais propostas
+
+            Numero de Linhas   =     20
+            Numero de Colunas  =     40
+            Densidade          =  26.00
+            Tamanho Mem Dual   =    300
+            Tamanho Mem Cortes =  50021
+
+--------------------------------------------------------------------------------------------------------------------------------
+ Tempo Theur   Prop   Acei  Igual   Pior  %Pior  %Acei       SolDual  Cut       GDual    %      Subgrad    %    3-Optimum    %
+     0      0      1      1      0      0    0.0  100.0    384871.909   0   384871.909  0.3        0.000  0.0        0.000  0.0
+     0      0      2      2      0      0    0.0  100.0    440002.994   0   440002.994  0.7        0.000  0.0        0.000  0.0
+     0      0      4      3      1      0    0.0   75.0    455611.813   0   455611.813  1.0        0.000  0.0        0.000  0.0
+     0      0     13     10      3      0    0.0   76.9    469767.604   0   469767.604  3.3        0.000  0.0        0.000  0.0
+     0      0    110     92     18      0    0.0   83.6    474128.023   0   474128.023 30.7        0.000  0.0        0.000  0.0
+     0      0    112     94     18      0    0.0   83.9    474189.996   0   474189.996 31.3        0.000  0.0        0.000  0.0
+     7      0    150    116     34      0    0.0   77.3    474189.996   0   474189.996 38.7        0.000  0.0        0.000  0.0
+     7      0    150    116     34      0    0.0   77.3    474189.996   0   474189.996 38.7        0.000  0.0        0.000  0.0

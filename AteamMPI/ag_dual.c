@@ -31,6 +31,7 @@
 int    *I_u     = NULL,
        *inact   = NULL;
 double *delta_u = NULL;
+
 MPI_Comm interfaceComm;
 
 void ExecAgDual(MPI_Comm communicator);
@@ -64,14 +65,24 @@ main(int argc, char *argv[])
   }	 
   else
    { 
-   	 TimeSleeping  = (int)  ReadAteamParam(1);
+/*
+     TimeSleeping  = (int)  ReadAteamParam(1);
      MaxLenDualMem = (int)  ReadAteamParam(2);
      CutsofSol     = (int)  ReadAteamParam(6);
      MaxExeTime    = (int)  ReadAteamParam(11);
      ReducPerc     = (int)  ReadAteamParam(12);
      RandomDual    = (char) ReadAteamParam(17);
-     if (!(finput = fopen(argv[2],"r")))
-     { printf("\n\n* Erro na abertura do arquivo %s. *\n",argv[2]);
+*/
+
+     TimeSleeping  = atoi(argv[2]);
+     MaxLenDualMem = atoi(argv[3]);
+     CutsofSol     = atoi(argv[4]);
+     MaxExeTime    = atoi(argv[5]);
+     ReducPerc     = atoi(argv[6]);
+     RandomDual    = (char) atoi(argv[7]);
+
+     if (!(finput = fopen(argv[1],"r")))
+     { printf("\n\n* Erro na abertura do arquivo %s. *\n",argv[1]);
 	   exit(1);
      }
      ReadSource();
@@ -121,12 +132,72 @@ void ExecAgDual(MPI_Comm communicator)
   I_u              = (int *) malloc((max_lin + 1) * sizeof(int));
   inact            = (int *) malloc(max_lin * sizeof(int));
   cut              = (CutType *) malloc(CutsofSol * sizeof(CutType));
+  
+  int * bufferInterface;
+  MPI_Request request;
+  MPI_Status status;
+  int count = 0;
+  char change[1];
+  int flag = 0, position = 0;
+  int aux = -1;
+
   for (i = 0; i < CutsofSol; i++)
     cut[i].coef = (short *) malloc(nb_col * sizeof(short));
 
   GetTimes(FALSE);
   do
-   {/* if (sleep_ag)
+   {
+     MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, interfaceComm, &flag, &status);
+     MPI_Get_count(&status, MPI_PACKED, &count);
+
+     if(flag){
+      
+      bufferInterface = malloc(count);
+      MPI_Recv(bufferInterface, count, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, interfaceComm, &status);
+      MPI_Unpack(bufferInterface, count, &position, &change[0], 1, MPI_CHAR, interfaceComm);
+      
+      if(change[0] == 'S'){
+        return;
+      }
+      
+      else if(change[0] == 'P'){
+   
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);
+	    if(aux != -1)
+	      TimeSleeping = aux;
+	    
+	    aux = -1;
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1)
+           MaxLenDualMem = aux;
+
+      aux = -1;
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1)
+          CutsofSol    = aux;
+        
+      aux = -1;
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1)
+          MaxExeTime   = aux;
+      
+      aux = -1;
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1)
+          ReducPerc = aux;
+
+      aux = -1;
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1)
+          RandomDual = (char) aux;
+      
+	   }
+	  
+      position = 0;
+      flag = 0;
+      free(bufferInterface);
+     } 
+     /* if (sleep_ag)
        sleep(TimeSleeping); */
      RequestNCutstoServer(&stop,&nb_cuts,cut,communicator);
      if (!stop)
@@ -138,17 +209,17 @@ void ExecAgDual(MPI_Comm communicator)
 	   GetTimes(TRUE);
 
 	   DualSol.proc_time = total_time_cpu - lost_time_cpu;
-	   printf("droga");
+	   //printf("droga");
 	   SendDualSolutiontoServer(&stop,&sleep_ag,&new_problem,
 				                &DualSol,communicator);
 	   if (nb_cuts > 0)
 	     ExcludeCutsofProblem(nb_cuts);
      }
-     printf("\n* Dual *");
+     //printf("\n* Dual *");
    } while((!stop) && (MaxExeTimeCron()));
 
-  if (!stop)
-    StopAteam(communicator,NULL);
+  //if (!stop)
+    //StopAteam(communicator,NULL);
   
   free(DualSol.var_u);
   free(DualSol.red_cost);

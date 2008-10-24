@@ -32,6 +32,8 @@ int    *aux_x = NULL;
 float  *grad  = NULL;
 double *aux_u = NULL;
 
+MPI_Comm interfaceComm;
+
 void ExecAgSubgr(MPI_Comm communicatorMD, MPI_Comm communicatorMP);
 void WriteProblem(char     *path,
 		  		  int       nb_prob,
@@ -54,11 +56,10 @@ main(int argc, char *argv[])
   char portMD[MPI_MAX_PORT_NAME],
        portMP[MPI_MAX_PORT_NAME];
        
-  MPI_Comm commServerMD, interfaceComm, commServerMP;          
-  	            				            
-  MPI_Init(&argc, &argv);               
+  MPI_Comm commServerMD, commServerMP;
+  MPI_Init(&argc, &argv);
   MPI_Comm_get_parent(&interfaceComm);
-                                       
+
   /* Tetativa de conectar com o servidor */
   flagConnectMD = MPI_Lookup_name("ServerMD", MPI_INFO_NULL, portMD);
   if(flagConnectMD) 
@@ -77,12 +78,18 @@ main(int argc, char *argv[])
      }
      else
      {  
-     	MPI_Comm_connect(portMP, MPI_INFO_NULL, 0, MPI_COMM_SELF, &commServerMP);
-     	
-     	CutsofSol  = ReadAteamParam(6);
-	    MaxExeTime = ReadAteamParam(11);
-	    if (!(finput = fopen(argv[2],"r")))
-	    { printf("\n\n* Erro na abertura do arquivo %s. *\n",argv[2]);
+      MPI_Comm_connect(portMP, MPI_INFO_NULL, 0, MPI_COMM_SELF, &commServerMP);
+
+/*
+      CutsofSol  = ReadAteamParam(6);
+      MaxExeTime = ReadAteamParam(11);
+*/
+
+        CutsofSol       = atoi(argv[2]);
+        MaxExeTime      = atoi(argv[3]);
+
+	    if (!(finput = fopen(argv[1],"r")))
+	    { printf("\n\n* Erro na abertura do arquivo %s. *\n",argv[1]);
 	      exit(1);
          }
 	    ReadSource();
@@ -103,8 +110,8 @@ main(int argc, char *argv[])
    MPI_Send(&message, 1, MPI_INT, 0, 1, commServerMP);
    
    /* Envia mensagem de Finalizacao para interface */
-   //message = 1;
-   //MPI_Send(&message, 1, MPI_INT, 0, 1, interfaceComm);
+   message = 1;
+   MPI_Send(&message, 1, MPI_INT, 0, 1, interfaceComm);
   
    MPI_Comm_disconnect(&commServerMD);
    MPI_Comm_disconnect(&commServerMP);
@@ -152,14 +159,57 @@ void ExecAgSubgr(MPI_Comm communicatorMD, MPI_Comm communicatorMP)
 
   GetTimes(FALSE);
   GetResultsPath(path, communicatorMD);
+
+  int * bufferInterface;
+  MPI_Request request;
+  MPI_Status status;
+  int count = 0;
+  char change[1];
+  int flag = 0, position = 0;
+  int aux = -1;
+
   do
-  { RequestDualSol(FALSE,&stop,Constant,cut_pos,var_u,red_cost,
+  {
+    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, interfaceComm, &flag, &status);
+    MPI_Get_count(&status, MPI_PACKED, &count);
+
+    if(flag){
+      
+      bufferInterface = malloc(count);
+      MPI_Recv(bufferInterface, count, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, interfaceComm, &status);
+      MPI_Unpack(bufferInterface, count, &position, &change[0], 1, MPI_CHAR, interfaceComm);
+      
+      if(change[0] == 'S'){
+        return;
+      }
+      
+      else if(change[0] == 'P'){
+      
+      MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);
+	    if(aux != -1)
+	      CutsofSol = aux;
+	    
+      aux = -1;
+	    MPI_Unpack(bufferInterface, count, &position, &aux, 1, MPI_INT, interfaceComm);  
+        if(aux != -1)
+          MaxExeTime   = aux;
+      
+	  }
+	  
+      position = 0;
+      flag = 0;
+      free(bufferInterface);
+    }
+
+
+
+      RequestDualSol(FALSE,&stop,Constant,cut_pos,var_u,red_cost,
 /*   { RequestDualSol(&stop,LinearDecr,cut_pos,var_u,red_cost, */
 		    &DualSol,agent_subgrad,communicatorMD);
-		    printf("\n subgr dual %f", DualSol.value);
+		    //printf("\n subgr dual %f", DualSol.value);
     if (!stop)
       { RequestPrimalSol(TRUE,&stop,0,var_x,&PrimalSol,communicatorMP);
-	    printf("\n subgr primal %f", PrimalSol.value);
+	    //printf("\n subgr primal %f", PrimalSol.value);
         
         if (!stop)
 	    { gap = (PrimalSol.value - DualSol.value) / PrimalSol.value;
@@ -186,8 +236,8 @@ void ExecAgSubgr(MPI_Comm communicatorMD, MPI_Comm communicatorMP)
 		      if (gap < 0.05)
 		       lambda = 0.5;
 		     SubGradiente(lambda,&DualSol,&PrimalSol);	
-		     printf("\n subgr SubGradiente dual %f", DualSol.value);
-		     printf("\n subgr SubGradiente primal %f", PrimalSol.value);
+		     //printf("\n subgr SubGradiente dual %f", DualSol.value);
+		     //printf("\n subgr SubGradiente primal %f", PrimalSol.value);
 		     gap = (PrimalSol.value - DualSol.value) / PrimalSol.value;
 		     if (gap <= epsilon)
 		     { stop = TRUE;
@@ -207,7 +257,7 @@ void ExecAgSubgr(MPI_Comm communicatorMD, MPI_Comm communicatorMP)
 	     }
        }
       
-      printf("\n subgr");
+      //printf("\n subgr");
       
       }
       
@@ -216,7 +266,7 @@ void ExecAgSubgr(MPI_Comm communicatorMD, MPI_Comm communicatorMP)
    } while((!stop) && (MaxExeTimeCron()));
 
  
-  StopAteam(communicatorMD, communicatorMP);
+  //StopAteam(communicatorMD, communicatorMP);
   free(cut_pos);
   free(var_u);
   free(red_cost);
