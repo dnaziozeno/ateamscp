@@ -1,0 +1,28 @@
+O arquivo contem ''fotos'' da memoria de solucoes primais
+Tempo    -> Tempo entre o inicio do A-Team e a foto
+THeur    -> Tempo de execucao de cada uma das heuristica
+Prop     -> Nr de sol. primais propostas a memoria
+Acei     -> Nr de sol. primais prop. e aceitas pela mem
+Igual    -> Nr de sol. primais prop. nao aceitas iguais
+Pior     -> Nr de sol. primais prop. pior que pior da mem
+%Pior    -> Taxa de proposicao de sol. duais piores
+%Acei    -> Taxa de aceitacao das sol. duais propostas
+SolPrimal-> Valor do melhor solucao primal encontrada
+
+            Numero de Linhas   =    20 
+            Numero de Colunas  =    40 
+            Densidade          = 26.00 
+            Tamanho Mem Primal =   600 
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+ Tempo  Theur   Prop   Acei  Igual   Pior  %Pior  %Acei    SolPrimal      GPrimal    %   RandAdjust    %    LocSearch    %     Consenso    %
+     0      0      1      1      0      0    0.0  100.0   785238.764   785238.764  0.2        0.000  0.0        0.000  0.0        0.000  0.0
+     0      0      2      2      0      0    0.0  100.0   735600.333   735600.333  0.3        0.000  0.0        0.000  0.0        0.000  0.0
+     0      0      3      3      0      0    0.0  100.0   685434.701   685434.701  0.5        0.000  0.0        0.000  0.0        0.000  0.0
+     0      0      4      4      0      0    0.0  100.0   658355.531   658355.531  0.7        0.000  0.0        0.000  0.0        0.000  0.0
+     0      0     13     13      0      0    0.0  100.0   655098.122   655098.122  2.2        0.000  0.0        0.000  0.0        0.000  0.0
+     0      0     14     14      0      0    0.0  100.0   638331.669   638331.669  2.3        0.000  0.0        0.000  0.0        0.000  0.0
+     3      0    313     95    218      0    0.0   30.4   638331.669   638331.669 15.7        0.000  0.0   735152.869  0.2        0.000  0.0
+     3      0    327     96    231      0    0.0   29.4   638331.669   638331.669 15.7        0.000  0.0   725192.725  0.3        0.000  0.0
+     3      0    331     98    233      0    0.0   29.6   638331.669   638331.669 15.7        0.000  0.0   712872.841  0.7        0.000  0.0
+     3      0   1011    105    906      0    0.0   10.4   638331.669   638331.669 15.7   763827.619  0.2   712872.841  1.7        0.000  0.0

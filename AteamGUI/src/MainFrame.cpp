@@ -187,8 +187,6 @@ void MainFrame::onStopClick(wxCommandEvent &event)
     edit_button->Disable();
     start_button->Enable();
 
-    //team_tree_ctrl->DeleteAllItems();
-
     wxTreeItemId current_agent_item_id;
     MyTreeItemData *current_agent_item_data;
 
@@ -203,34 +201,74 @@ void MainFrame::onStopClick(wxCommandEvent &event)
         }
     }
 
-    MPI_Comm interComSpawn1, interComSpawn2, interComSpawn3;
-    int errcodes[1];
+/* =================================================================== */
 
-    MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/stopATEAM",
-        MPI_ARGV_NULL, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn1, errcodes
-    );
+  int method = 0,
+      flagConnectMD = 1,
+      flagConnectMP = 1,
+      position = 0;
+       
+  char  portMD[MPI_MAX_PORT_NAME],
+        portMP[MPI_MAX_PORT_NAME],
+        bufferMD[100],
+        bufferMP[100];
+       
+  MPI_Comm commServerMD;
+  MPI_Comm commServerMP;
+  
+  flagConnectMD = MPI_Lookup_name("ServerMD", MPI_INFO_NULL, portMD);
+  flagConnectMP = MPI_Lookup_name("ServerMP", MPI_INFO_NULL, portMP);
+  
+  method = 10;
+  
+  if (!flagConnectMD)
+  { 
+  	MPI_Comm_connect(portMD, MPI_INFO_NULL, 0, MPI_COMM_SELF, &commServerMD);
+    MPI_Pack(&method, 1, MPI_INT, bufferMD, 100, &position, commServerMD);
+    MPI_Send(bufferMD, position, MPI_PACKED, 0, 1, commServerMD);
+    MPI_Comm_disconnect(&commServerMD);
+  }
+  position = 0;
+  if (!flagConnectMP)
+  { 
+   	MPI_Comm_connect(portMP, MPI_INFO_NULL, 0, MPI_COMM_SELF, &commServerMP);
+    MPI_Pack(&method, 1, MPI_INT, bufferMP, 100, &position, commServerMP);
+    MPI_Send(bufferMP, position, MPI_PACKED, 0, 1, commServerMP);
+    MPI_Comm_disconnect(&commServerMP);
+  }
+  
+  if ((flagConnectMD) && (flagConnectMP)){
+    printf("\n\n* Nenhum dos servidores de memoria do ATeam esta ativo *\n");fflush(stdout);
+  }else
+    printf("\n\n* Servidores de soluções serão finalizados ... *\n");
+  
+  sleep(1);
 
-    sleep(1);
+  flagConnectMD = flagConnectMP = 1;
 
-    //int teste = 0;
-    //MPI_Recv(&teste, 1, MPI_INT, 0, MPI_ANY_TAG, comm_three_opt, &status);
+  flagConnectMD = MPI_Lookup_name("ServerMD", MPI_INFO_NULL, portMD);
+  flagConnectMP = MPI_Lookup_name("ServerMP", MPI_INFO_NULL, portMP);
+  
+  if (!flagConnectMD)
+  { 
+  	MPI_Comm_connect(portMD, MPI_INFO_NULL, 0, MPI_COMM_SELF, &commServerMD);
+    MPI_Comm_disconnect(&commServerMD);
+  }
+ 
+  if (!flagConnectMP)
+  { 
+   	MPI_Comm_connect(portMP, MPI_INFO_NULL, 0, MPI_COMM_SELF, &commServerMP);
+    MPI_Comm_disconnect(&commServerMP);
+  }
+  
+  if ((flagConnectMD) && (flagConnectMP)){
+    printf("\n\n* Nenhum dos servidores de memoria do ATeam esta ativo *\n");fflush(stdout);
+  }else
+    printf("\n\n* Servidores de soluções FINALIZADOS ... *\n");
 
-    MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/stopSERVER",
-        MPI_ARGV_NULL, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn2, errcodes
-    );
 
-    sleep(1);
+  MPI_Finalize();
 
-    MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/stopFINAL",
-        MPI_ARGV_NULL, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &interComSpawn3, errcodes
-    );
-
-    sleep(1);
-
-    MPI_Finalize();
 }
 
 /* ------------------------------------------------------------------------------------- */

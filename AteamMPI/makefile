@@ -2,117 +2,120 @@ CC = mpicc
 CFLAGS = -g
 CLIBS = -lm -lpthread
 
-all: main
+ECHO = echo
 
-clean:  
-	rm *.o
-	rm initMD
-	rm serverMD
-	rm ag_3opt
-	rm stopATEAM
-	rm stopSERVER
-	rm stopFINAL
-	rm initMP 
-	rm serverMP 
-	rm ag_consen 
-	rm ag_adjust 
-	rm ag_search   
-	rm ag_subgr
-	rm ag_beasley
-	rm ag_primal
+all: project-main
 	
-main: initMD serverMD ag_3opt stopATEAM stopSERVER stopFINAL initMP serverMP ag_consen ag_adjust ag_search ag_subgr ag_beasley ag_dual ag_primal dumpMEM
-
-initMD: grdual.o agentrot.o readsc.o readparam.o reduction.o initMD.c
-	$(CC) $(CFLAGS) grdual.o agentrot.o readsc.o readparam.o reduction.o initMD.c -o initMD
-
-grdual.o: grdual.c
-	$(CC) $(CFLAGS) -c grdual.c
-
-agentrot.o: agentrot.c
-	$(CC) $(CFLAGS) -c agentrot.c
-
-readsc.o: readsc.c
-	$(CC) $(CFLAGS) -c readsc.c
-
-readparam.o: readparam.c
-	$(CC) $(CFLAGS) -c readparam.c
-
-reduction.o: reduction.c
-	$(CC) $(CFLAGS) -c reduction.c
-
-
-serverMD: readparam.o dualrot.o serverMD.c
-	$(CC) $(CFLAGS) readparam.o dualrot.o serverMD.c -o serverMD $(CLIBS)
-
-dualrot.o:
-	$(CC) $(CFLAGS) -c dualrot.c
-
-ag_3opt: agentrot.o threeopt.o readparam.o reduction.o readsc.o ag_3opt.c
-	$(CC) $(CFLAGS) agentrot.o threeopt.o readparam.o reduction.o readsc.o ag_3opt.c -o ag_3opt
-
-threeopt.o: 
-	$(CC) $(CFLAGS) -c threeopt.c
-
-stopATEAM: stopATEAM.c
-	$(CC) $(CFLAGS) stopATEAM.c -o stopATEAM
-
-stopSERVER: stopSERVER.c
-	$(CC) $(CFLAGS) stopSERVER.c -o stopSERVER
+project-main: begin main end
 	
-stopFINAL: stopFINAL.c
-	$(CC) $(CFLAGS) stopFINAL.c -o stopFINAL	
-
-grprimal: grprimal.c
-	$(CC) $(CFLAGS) -c grprimal.c
+begin:
+	@$(ECHO) ""
+	@$(ECHO) "Building Project Ateam-MPI:"
+	@$(ECHO) "================================"
 	
-frgreedy: frgreedy.c	
-	$(CC) $(CFLAGS) -c frgreedy.c
-
-initMP: frgreedy.o grprimal.o agentrot.o readsc.o readparam.o reduction.o initMP.c
-	$(CC) $(CFLAGS) frgreedy.o grprimal.o agentrot.o readsc.o readparam.o reduction.o initMP.c -o initMP $(CLIBS)
-
-primalrot: primalrot.c
-	$(CC) $(CFLAGS) -c primalrot.c
-
-serverMP: readparam.o primalrot.o serverMP.c
-	$(CC) $(CFLAGS) readparam.o primalrot.o serverMP.c -o serverMP $(CLIBS)
 	
-ag_consen: agentrot.o grprimal.o frgreedy.o readparam.o reduction.o readsc.o ag_consen.c
-	$(CC) $(CFLAGS) agentrot.o grprimal.o frgreedy.o readparam.o reduction.o readsc.o ag_consen.c -o ag_consen $(CLIBS)
-
-adjust: adjust.c
-	$(CC) $(CFLAGS) -c adjust.c
-
-ag_adjust: agentrot.o adjust.o readparam.o reduction.o readsc.o ag_adjust.c
-	$(CC) $(CFLAGS) agentrot.o adjust.o readparam.o reduction.o readsc.o ag_adjust.c -o ag_adjust $(CLIBS)
-
-lsearch: lsearch.c
-	$(CC) $(CFLAGS) -c lsearch.c
-
-frsearch: frsearch.c
-	$(CC) $(CFLAGS) -c frsearch.c
-
-ag_search: agentrot.o frsearch.o lsearch.o readparam.o reduction.o readsc.o ag_search.c
-	$(CC) $(CFLAGS) agentrot.o frsearch.o lsearch.o readparam.o reduction.o readsc.o ag_search.c -o ag_search $(CLIBS)
+main: ./bin/initMD ./bin/serverMD ./bin/initMP ./bin/ag_3opt ./bin/stopATEAM ./bin/stopSERVER ./bin/stopFINAL ./bin/serverMP ./bin/ag_consen ./bin/ag_adjust ./bin/ag_search ./bin/ag_subgr ./bin/ag_beasley ./bin/ag_dual ./bin/ag_primal ./bin/dumpMEM
 	
-subgrad: subgrad.c
-	$(CC) $(CFLAGS) -c subgrad.c
-
-ag_subgr: agentrot.o subgrad.o readparam.o reduction.o readsc.o ag_subgr.c
-	$(CC) $(CFLAGS) agentrot.o subgrad.o readparam.o reduction.o readsc.o ag_subgr.c -o ag_subgr $(CLIBS)
-
-beasley: beasley.c
-	$(CC) $(CFLAGS) -c beasley.c
-
-ag_beasley: agentrot.o beasley.o readparam.o reduction.o readsc.o ag_beasley.c
-	$(CC) $(CFLAGS) agentrot.o beasley.o readparam.o reduction.o readsc.o ag_beasley.c -o ag_beasley $(CLIBS)
-
-ag_dual: agentrot.o grdual.o readparam.o reduction.o readsc.o ag_dual.c
-	$(CC) $(CFLAGS) agentrot.o grdual.o readparam.o reduction.o readsc.o ag_dual.c -o ag_dual $(CLIBS)
-
-ag_primal: agentrot.o grprimal.o readparam.o reduction.o readsc.o ag_primal.c
-	$(CC) $(CFLAGS) agentrot.o grprimal.o readparam.o reduction.o readsc.o ag_primal.c -o ag_primal $(CLIBS)
-
-dumpMEM: dumpMEM.c
-	$(CC) $(CFLAGS) dumpMEM.c -o dumpMEM
+./bin/initMD: ./obj/grdual.o ./obj/agentrot.o ./obj/readsc.o ./obj/readparam.o ./obj/reduction.o ./src/initMD.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/grdual.o ./obj/agentrot.o ./obj/readsc.o ./obj/readparam.o ./obj/reduction.o ./src/initMD.c -o ./bin/initMD
+	
+./obj/grdual.o: ./src/grdual.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/grdual.c -o ./obj/grdual.o
+	
+./obj/agentrot.o: ./src/grdual.c ./src/agentrot.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/agentrot.c -o ./obj/agentrot.o
+	
+./obj/readsc.o: ./src/grdual.c ./src/readsc.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/readsc.c -o ./obj/readsc.o
+	
+./obj/readparam.o: ./src/grdual.c ./src/readparam.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/readparam.c -o ./obj/readparam.o
+	
+./obj/reduction.o: ./src/grdual.c ./src/reduction.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/reduction.c -o ./obj/reduction.o
+	
+./bin/serverMD: ./obj/readparam.o ./obj/dualrot.o ./src/serverMD.c ./src/serverMD.h ./src/globais.h
+	$(CC) $(CFLAGS) ./obj/readparam.o ./obj/dualrot.o ./src/serverMD.c -o ./bin/serverMD $(CLIBS)
+	
+./obj/dualrot.o: ./src/dualrot.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/dualrot.c -o ./obj/dualrot.o
+	
+./bin/ag_3opt: ./obj/agentrot.o ./obj/threeopt.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_3opt.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/agentrot.o ./obj/threeopt.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_3opt.c -o ./bin/ag_3opt
+	
+./obj/threeopt.o: ./src/threeopt.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/threeopt.c -o ./obj/threeopt.o
+	
+./bin/stopATEAM: ./src/stopATEAM.c ./src/globais.h
+	$(CC) $(CFLAGS) ./src/stopATEAM.c -o ./bin/stopATEAM
+	
+./bin/stopSERVER: ./src/stopSERVER.c ./src/globais.h
+	$(CC) $(CFLAGS) ./src/stopSERVER.c -o ./bin/stopSERVER
+	
+./bin/stopFINAL: ./src/stopFINAL.c
+	$(CC) $(CFLAGS) ./src/stopFINAL.c -o ./bin/stopFINAL
+	
+./obj/grprimal.o: ./src/grprimal.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/grprimal.c -o ./obj/grprimal.o
+	
+./obj/frgreedy.o: ./src/frgreedy.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/frgreedy.c -o ./obj/frgreedy.o
+	
+./bin/initMP: ./obj/frgreedy.o ./obj/grprimal.o ./obj/agentrot.o ./obj/readsc.o ./obj/readparam.o ./obj/reduction.o ./src/initMP.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/frgreedy.o ./obj/grprimal.o ./obj/agentrot.o ./obj/readsc.o ./obj/readparam.o ./obj/reduction.o ./src/initMP.c -o ./bin/initMP $(CLIBS)
+	
+./obj/primalrot.o: ./src/primalrot.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/primalrot.c -o ./obj/primalrot.o
+	
+./bin/serverMP: ./obj/readparam.o ./obj/primalrot.o ./src/serverMP.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/readparam.o ./obj/primalrot.o ./src/serverMP.c -o ./bin/serverMP $(CLIBS)
+	
+./bin/ag_consen: ./obj/agentrot.o ./obj/grprimal.o ./obj/frgreedy.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_consen.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/agentrot.o ./obj/grprimal.o ./obj/frgreedy.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_consen.c -o ./bin/ag_consen $(CLIBS)
+	
+./obj/adjust.o: ./src/adjust.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/adjust.c -o ./obj/adjust.o
+	
+./bin/ag_adjust: ./obj/agentrot.o ./obj/adjust.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_adjust.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/agentrot.o ./obj/adjust.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_adjust.c -o ./bin/ag_adjust $(CLIBS)
+	
+./obj/lsearch.o: ./src/lsearch.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/lsearch.c -o ./obj/lsearch.o
+	
+./obj/frsearch.o: ./src/frsearch.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/frsearch.c -o ./obj/frsearch.o
+	
+./bin/ag_search: ./obj/agentrot.o ./obj/frsearch.o ./obj/lsearch.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_search.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/agentrot.o ./obj/frsearch.o ./obj/lsearch.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_search.c -o ./bin/ag_search $(CLIBS)
+	
+./obj/subgrad.o: ./src/subgrad.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/subgrad.c -o ./obj/subgrad.o
+	
+./bin/ag_subgr: ./obj/agentrot.o ./obj/subgrad.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_subgr.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/agentrot.o ./obj/subgrad.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_subgr.c -o ./bin/ag_subgr $(CLIBS)
+	
+./obj/beasley.o: ./src/beasley.c ./src/globais.h
+	$(CC) $(CFLAGS) -c ./src/beasley.c -o ./obj/beasley.o
+	
+./bin/ag_beasley: ./obj/agentrot.o ./obj/beasley.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_beasley.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/agentrot.o ./obj/beasley.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_beasley.c -o ./bin/ag_beasley $(CLIBS)
+	
+./bin/ag_dual: ./obj/agentrot.o ./obj/grdual.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_dual.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/agentrot.o ./obj/grdual.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_dual.c -o ./bin/ag_dual $(CLIBS)
+	
+./bin/ag_primal: ./obj/agentrot.o ./obj/grprimal.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_primal.c ./src/globais.h ./src/agentes.h
+	$(CC) $(CFLAGS) ./obj/agentrot.o ./obj/grprimal.o ./obj/readparam.o ./obj/reduction.o ./obj/readsc.o ./src/ag_primal.c -o ./bin/ag_primal $(CLIBS)
+	
+./bin/dumpMEM: ./src/dumpMEM.c
+	$(CC) $(CFLAGS) ./src/dumpMEM.c -o ./bin/dumpMEM
+	
+end:
+	@$(ECHO) ""
+	@$(ECHO) "Ready!"
+	@$(ECHO) ""
+	
+	
+clean:
+	rm ./obj/*
+	rm ./bin/*
+	

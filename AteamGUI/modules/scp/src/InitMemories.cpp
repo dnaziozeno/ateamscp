@@ -304,21 +304,29 @@ void InitMemories::onInitMDClick(wxCommandEvent &event)
 {
     MainFrame *main_frame = (MainFrame *) this->GetParent();
 
-    char *argvInitMD[6];
+    char *argvInitMD[10];
     argvInitMD[0] = (char *) malloc (512 * sizeof(char));
     argvInitMD[1] = (char *) malloc (512 * sizeof(char));
     argvInitMD[2] = (char *) malloc (512 * sizeof(char));
     argvInitMD[3] = (char *) malloc (512 * sizeof(char));
     argvInitMD[4] = (char *) malloc (512 * sizeof(char));
-    argvInitMD[5] = NULL;
+    argvInitMD[5] = (char *) malloc (512 * sizeof(char));
+    argvInitMD[6] = (char *) malloc (512 * sizeof(char));
+    argvInitMD[7] = (char *) malloc (512 * sizeof(char));
+    argvInitMD[8] = (char *) malloc (512 * sizeof(char));
+    argvInitMD[9] = NULL;
 
-    strcpy(argvInitMD[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/20_40_20");
-    strcpy(argvInitMD[1], "/home/naziozeno/Documents/projeto-final/AteamSCP/teste/");
+    strcpy(argvInitMD[0], "../../Instance/20_40_20");
+    strcpy(argvInitMD[1], "../../Statistics/");
 
     int *params = init_md_ateam_param->interfaceToParams();
     strcpy(argvInitMD[2], wxString::Format(wxT("%i"), params[2]).mb_str());
     strcpy(argvInitMD[3], wxString::Format(wxT("%i"), params[12]).mb_str());
     strcpy(argvInitMD[4], wxString::Format(wxT("%i"), params[16]).mb_str());
+strcpy(argvInitMD[5], wxString::Format(wxT("%i"), params[4]).mb_str());
+strcpy(argvInitMD[6], wxString::Format(wxT("%i"), params[5]).mb_str());
+strcpy(argvInitMD[7], wxString::Format(wxT("%i"), params[6]).mb_str());
+strcpy(argvInitMD[8], wxString::Format(wxT("%i"), params[21]).mb_str());
 
     MPI_Comm com2;
     int errcodes[1];
@@ -326,7 +334,7 @@ void InitMemories::onInitMDClick(wxCommandEvent &event)
     MPI_Init(NULL, NULL);
 
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/initMD",
+        "../../AteamMPI/bin/initMD",
         argvInitMD, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &com2, errcodes
     );
 
@@ -373,7 +381,7 @@ void InitMemories::onThreeOPTClick(wxCommandEvent &event)
     argvThreeOpt[3] = (char *) malloc (16 * sizeof(char));
     argvThreeOpt[4] = NULL;
 
-    strcpy(argvThreeOpt[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/20_40_20");
+    strcpy(argvThreeOpt[0], "../../Instance/20_40_20");
 
     int *params = three_opt_ateam_param->interfaceToParams();
     strcpy(argvThreeOpt[1], wxString::Format(wxT("%i"), params[1]).mb_str());
@@ -384,7 +392,7 @@ void InitMemories::onThreeOPTClick(wxCommandEvent &event)
     MPI_Comm *comm = (MPI_Comm *) malloc(sizeof(MPI_Comm));
 
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/ag_3opt",
+        "../../AteamMPI/bin/ag_3opt",
         argvThreeOpt, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, comm, errcodes
     );
 
@@ -417,7 +425,7 @@ void InitMemories::onSubGClick(wxCommandEvent &event)
     argvSubg[2] = (char *) malloc (16 * sizeof(char));
     argvSubg[3] = NULL;
 
-    strcpy(argvSubg[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/20_40_20");
+    strcpy(argvSubg[0], "../../Instance/20_40_20");
 
     int *params = three_opt_ateam_param->interfaceToParams();
     strcpy(argvSubg[1], wxString::Format(wxT("%i"), params[6]).mb_str());
@@ -427,7 +435,7 @@ void InitMemories::onSubGClick(wxCommandEvent &event)
     MPI_Comm *comm = (MPI_Comm *) malloc(sizeof(MPI_Comm));
 
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/ag_subgr",
+        "../../AteamMPI/bin/ag_subgr",
         argvSubg, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, comm, errcodes
     );
 
@@ -453,28 +461,32 @@ void InitMemories::onConfigureSubGClick(wxCommandEvent &event)
 /* ------------------------------------------------------------------------------------- */
 void InitMemories::onInitMPClick(wxCommandEvent &event)
 {
-    char *argvInitMP[6];
+    char *argvInitMP[8];
 
     argvInitMP[0] = (char *) malloc (512 * sizeof(char));
     argvInitMP[1] = (char *) malloc (512 * sizeof(char));
     argvInitMP[2] = (char *) malloc (512 * sizeof(char));
     argvInitMP[3] = (char *) malloc (512 * sizeof(char));
     argvInitMP[4] = (char *) malloc (512 * sizeof(char));
-    argvInitMP[5] = NULL;
+    argvInitMP[5] = (char *) malloc (512 * sizeof(char));
+    argvInitMP[6] = (char *) malloc (512 * sizeof(char));
+    argvInitMP[7] = NULL;
 
-    strcpy(argvInitMP[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/20_40_20");
-    strcpy(argvInitMP[1], "/home/naziozeno/Documents/projeto-final/AteamSCP/teste/");
+    strcpy(argvInitMP[0], "../../Instance/20_40_20");
+    strcpy(argvInitMP[1], "../../Statistics/");
 
     int *params = init_mp_ateam_param->interfaceToParams();
     strcpy(argvInitMP[2], wxString::Format(wxT("%i"), params[3]).mb_str());
     strcpy(argvInitMP[3], wxString::Format(wxT("%i"), params[13]).mb_str());
     strcpy(argvInitMP[4], wxString::Format(wxT("%i"), params[18]).mb_str());
+    strcpy(argvInitMP[4], wxString::Format(wxT("%i"), params[22]).mb_str());
+    strcpy(argvInitMP[4], wxString::Format(wxT("%i"), params[23]).mb_str());
 
     MPI_Comm com2;
     int errcodes[1];
 
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/initMP",
+        "../../AteamMPI/bin/initMP",
         argvInitMP, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, &com2, errcodes
     );
 
@@ -527,7 +539,7 @@ void InitMemories::onLSClick(wxCommandEvent &event)
     argvLs[4] = (char *) malloc (16 * sizeof(char));
     argvLs[5] = NULL;
 
-    strcpy(argvLs[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/20_40_20");
+    strcpy(argvLs[0], "../../Instance/20_40_20");
 
     int *params = three_opt_ateam_param->interfaceToParams();
     strcpy(argvLs[1], wxString::Format(wxT("%i"), params[11]).mb_str());
@@ -537,7 +549,7 @@ void InitMemories::onLSClick(wxCommandEvent &event)
     MPI_Comm *comm = (MPI_Comm *) malloc(sizeof(MPI_Comm));
 
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/ag_search",
+        "../../AteamMPI/bin/ag_search",
         argvLs, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, comm, errcodes
     );
 
@@ -572,7 +584,7 @@ void InitMemories::onPertClick(wxCommandEvent &event)
     argvPert[4] = (char *) malloc (16 * sizeof(char));
     argvPert[5] = NULL;
 
-    strcpy(argvPert[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/20_40_20");
+    strcpy(argvPert[0], "../../Instance/20_40_20");
 
     int *params = three_opt_ateam_param->interfaceToParams();
     strcpy(argvPert[1], wxString::Format(wxT("%i"), params[1]).mb_str());
@@ -584,7 +596,7 @@ void InitMemories::onPertClick(wxCommandEvent &event)
     MPI_Comm *comm = (MPI_Comm *) malloc(sizeof(MPI_Comm));
 
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/ag_adjust",
+        "../../AteamMPI/bin/ag_adjust",
         argvPert, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, comm, errcodes
     );
 
@@ -620,7 +632,7 @@ void InitMemories::onConsClick(wxCommandEvent &event)
     argvCons[5] = (char *) malloc (16 * sizeof(char));
     argvCons[6] = NULL;
 
-    strcpy(argvCons[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/20_40_20");
+    strcpy(argvCons[0], "../../Instance/20_40_20");
 
     int *params = three_opt_ateam_param->interfaceToParams();
     strcpy(argvCons[1], wxString::Format(wxT("%i"), params[1]).mb_str());
@@ -633,7 +645,7 @@ void InitMemories::onConsClick(wxCommandEvent &event)
     MPI_Comm *comm = (MPI_Comm *) malloc(sizeof(MPI_Comm));
 
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/ag_consen",
+        "../../AteamMPI/bin/ag_consen",
         argvCons, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, comm, errcodes
     );
 
@@ -670,7 +682,7 @@ void InitMemories::onPrimalClick(wxCommandEvent &event)
     argvPrimal[5] = (char *) malloc (16 * sizeof(char));
     argvPrimal[6] = NULL;
 
-    strcpy(argvPrimal[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/20_40_20");
+    strcpy(argvPrimal[0], "../../Instance/20_40_20");
 
     int *params = three_opt_ateam_param->interfaceToParams();
     strcpy(argvPrimal[1], wxString::Format(wxT("%i"), params[1]).mb_str());
@@ -683,7 +695,7 @@ void InitMemories::onPrimalClick(wxCommandEvent &event)
     MPI_Comm *comm = (MPI_Comm *) malloc(sizeof(MPI_Comm));
 
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/ag_primal",
+        "../../AteamMPI/bin/ag_primal",
         argvPrimal, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, comm, errcodes
     );
 
@@ -720,7 +732,7 @@ void InitMemories::onDualClick(wxCommandEvent &event)
     argvDual[6] = (char *) malloc (16 * sizeof(char));
     argvDual[7] = NULL;
 
-    strcpy(argvDual[0], "/home/naziozeno/Documents/projeto-final/AteamSCP/20_40_20");
+    strcpy(argvDual[0], "../../Instance/20_40_20");
 
     int *params = three_opt_ateam_param->interfaceToParams();
     strcpy(argvDual[1], wxString::Format(wxT("%i"), params[1]).mb_str());
@@ -734,7 +746,7 @@ void InitMemories::onDualClick(wxCommandEvent &event)
     MPI_Comm *comm = (MPI_Comm *) malloc(sizeof(MPI_Comm));
 
     MPI_Comm_spawn(
-        "/home/naziozeno/Documents/projeto-final/AteamSCP/AteamMPI/ag_dual",
+        "../../AteamMPI/bin/ag_dual",
         argvDual, 1, MPI_INFO_NULL, 0,  MPI_COMM_SELF, comm, errcodes
     );
 
